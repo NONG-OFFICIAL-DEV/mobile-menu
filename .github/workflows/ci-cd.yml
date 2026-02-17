@@ -50,6 +50,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # STEP 1: Copy the docker-compose file to the server
+      - name: Copy docker-compose.yml via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "docker-compose.yml" # Or the path to your file
+          target: "~/mobile-menu"
+
+      # STEP 2: Run the deployment script
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -58,12 +69,12 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             set -e
-            mkdir -p ~/mobile-menu
             cd ~/mobile-menu
+            
+            echo ">>> Pulling latest images"
+            docker compose pull
 
-            echo ">>> Pull latest frontend image"
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/mobile-menu-frontend:latest
-
-            echo ">>> Restart containers using docker-compose"
-            docker compose down --remove-orphans || true
+            echo ">>> Restarting containers"
+            # Using 'up -d' is usually better than 'down' followed by 'up' 
+            # as it reduces downtime.
             docker compose up -d --remove-orphans
