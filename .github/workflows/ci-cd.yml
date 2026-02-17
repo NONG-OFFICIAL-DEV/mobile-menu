@@ -6,32 +6,11 @@ on:
   workflow_dispatch:
 
 # =========================
-# 1. Detect changed paths
+# 1. Build & Push Docker Images
 # =========================
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      frontend: ${{ steps.filter.outputs.frontend }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Detect frontend changes
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            frontend:
-              - 'frontend/**'
-
-# =========================
-# 2. Build & Push Docker Images
-# =========================
   build-push:
     runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
     env:
       IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/mobile-menu-frontend
       IMAGE_TAG: ${{ github.sha }}
@@ -62,12 +41,11 @@ jobs:
           docker push $IMAGE_FRONTEND:$IMAGE_TAG
 
 # =========================
-# 3. Deploy to server
+# 2. Deploy to server
 # =========================
   deploy:
     runs-on: ubuntu-latest
     needs: build-push
-    if: needs.changes.outputs.frontend == 'true' 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
