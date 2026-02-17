@@ -17,7 +17,7 @@
   },
   "common": {
     "selectLanguage": "Select Language",
-    "search": "Search",
+    "search": "Search dishes, drinks...",
     "menu": "Menu",
     "cart": "Cart",
     "total": "Total",
@@ -27,11 +27,11 @@
     "emptyCart": "Your cart is empty",
     "orderHistory": "Order History",
     "dishesFound": "No dishes found",
-    "profile": "Profile",
-    "settings": "Settings",
+    "all": "All",
+    "scan": "Scan the menu and place your first order.",
     "logout": "Logout",
     "login": "Login",
-    "register": "Register"
+    "table": "Register"
   },
   "lang": {
     "km": "Khmer",
@@ -46,7 +46,8 @@
   "notification": {
     "addedToCart": "Added to cart",
     "orderPlaced": "Order placed successfully",
-    "orderCancelled": "Order cancelled"
+    "orderCancelled": "Order cancelled",
+    "limitOrder":"Only 5 orders per item can be ordered."
   },
   "header": {
     "orderTitle": "My Orders"

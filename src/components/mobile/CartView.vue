@@ -54,14 +54,18 @@
           <v-avatar color="grey-lighten-4" size="80" class="mb-4">
             <v-icon size="40" color="grey-lighten-1">mdi-basket-outline</v-icon>
           </v-avatar>
-          <p class="text-body-2 text-medium-emphasis">Your basket is empty</p>
+          <p class="text-body-2 text-medium-emphasis">
+            {{ t('common.emptyCart') }}
+          </p>
           <v-btn
-            variant="text"
             color="primary"
-            class="mt-2"
+            class="mt-4"
+            block
+            rounded="pill"
+            elevation="1"
             @click="$emit('back')"
           >
-            Go Shopping
+            {{ t('btn.order') }}
           </v-btn>
         </div>
       </v-fade-transition>
@@ -144,7 +148,7 @@
             {{ totalItems }} {{ t('common.items') }}
           </span>
           <span class="text-subtitle-2 font-weight-black">
-            Table {{ tableNumber }}
+            {{ t('common.table') }} {{ tableNumber }}
           </span>
         </div>
       </div>

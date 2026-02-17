@@ -1,4 +1,7 @@
 <script setup>
+  import { useI18n } from 'vue-i18n'
+  const { t } = useI18n()
+
   defineProps({
     categories: Array,
     modelValue: null,
@@ -16,7 +19,7 @@
       <v-text-field
         :model-value="search"
         @update:model-value="$emit('update:search', $event)"
-        placeholder="Search for coffee, tea..."
+        :placeholder="t('common.search')"
         prepend-inner-icon="mdi-magnify"
         flat
         rounded="pill"
@@ -44,7 +47,7 @@
             size="small"
             @click="select"
           >
-            All
+            {{ t('common.all') }}
           </v-btn>
         </v-slide-group-item>
         <v-slide-group-item

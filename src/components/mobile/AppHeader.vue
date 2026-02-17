@@ -1,6 +1,8 @@
 <script setup>
   import LanguageBottomSheet from '../customs/LanguageBottomSheet.vue'
-
+  import { useI18n } from 'vue-i18n'
+  const { t } = useI18n()
+  
   defineProps({
     tableNumber: { type: String, default: '00' },
     search: String,
@@ -34,7 +36,7 @@
       <div class="d-flex align-center ga-2">
         <!-- Cart -->
         <v-btn
-        v-if="cartCount"
+          v-if="cartCount"
           class="action-btn"
           icon
           variant="flat"
@@ -69,7 +71,7 @@
       <v-text-field
         :model-value="search"
         @update:model-value="$emit('update:search', $event)"
-        placeholder="Search dishes, drinks..."
+        :placeholder="t('common.search')"
         variant="solo"
         density="compact"
         hide-details

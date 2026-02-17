@@ -3,6 +3,8 @@
   import QtyStepper from '../customs/QtyStepper.vue'
   import { useCurrency } from '@/composables/useCurrency.js'
   const { formatCurrency } = useCurrency()
+  import { useI18n } from 'vue-i18n'
+  const { t } = useI18n()
 
   const props = defineProps({
     items: Array,
@@ -186,7 +188,7 @@
   >
     <div class="d-flex align-center">
       <v-icon start icon="mdi-alert-circle" />
-      <span>Maximum limit of {{ MAX_QTY_PER_ITEM }} reached</span>
+      <span>{{t('notification.limitOrder')}}</span>
     </div>
   </v-snackbar>
 

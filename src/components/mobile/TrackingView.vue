@@ -1,7 +1,7 @@
 <template>
   <div>
     <CustomAppHeader
-      title="Order Tracker"
+      :title="t('header.orderHistory')"
       live
       @back="$emit('reset')"
     />
@@ -38,8 +38,7 @@
         <p
           class="text-body-1 text-grey-darken-1 text-center mb-10 max-width-300"
         >
-          Scan the menu and place your first order. We'll track every step of
-          your meal right here.
+          {{ t('common.scan') }}
         </p>
 
         <v-btn
@@ -52,7 +51,7 @@
           @click="$emit('reset')"
         >
           <v-icon start class="mr-2">mdi-book-open-variant</v-icon>
-          Browse Full Menu
+          {{ t('btn.order') }}
         </v-btn>
       </div>
       <div v-else>
@@ -147,7 +146,9 @@
   import { useOrderStream } from '@/stores/useOrderStream'
   import { useCurrency } from '@/composables/useCurrency.js'
   import CustomAppHeader from './CustomAppHeader.vue'
+  import { useI18n } from 'vue-i18n'
 
+  const { t } = useI18n()
   const { formatCurrency } = useCurrency()
   const diningTableStore = useDiningTableStore()
   const route = useRoute()
@@ -393,5 +394,4 @@
     border-color: #3b828e;
     color: white;
   }
-
 </style>
