@@ -1,0 +1,54 @@
+{
+  "btn": {
+    "filter": "Filter",
+    "reFilter": "Clear Search",
+    "create": "Create",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "order": "Order",
+    "addToCart": "Add to Cart",
+    "placeOrder": "Place Order",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "yourOrder": "Your Order"
+  },
+  "common": {
+    "selectLanguage": "Select Language",
+    "search": "Search",
+    "menu": "Menu",
+    "cart": "Cart",
+    "total": "Total",
+    "quantity": "Quantity",
+    "price": "Price",
+    "items": "Items",
+    "emptyCart": "Your cart is empty",
+    "orderHistory": "Order History",
+    "dishesFound": "No dishes found",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "lang": {
+    "km": "Khmer",
+    "en": "English"
+  },
+  "orderStatus": {
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "notification": {
+    "addedToCart": "Added to cart",
+    "orderPlaced": "Order placed successfully",
+    "orderCancelled": "Order cancelled"
+  },
+  "header": {
+    "orderTitle": "My Orders"
+  }
+}

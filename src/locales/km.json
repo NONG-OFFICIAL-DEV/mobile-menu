@@ -1,0 +1,54 @@
+{
+  "btn": {
+    "filter": "តម្រៀប",
+    "reFilter": "ស្វែងរកឡើងវិញ",
+    "create": "បង្កើត",
+    "save": "រក្សាទុក",
+    "cancel": "បោះបង់",
+    "edit": "កែប្រែ",
+    "delete": "លុប",
+    "order": "បញ្ជាទិញ",
+    "addToCart": "បន្ថែមទៅរទេះ",
+    "placeOrder": "ដាក់ការបញ្ជាទិញ",
+    "back": "ត្រលប់",
+    "next": "បន្ទាប់",
+    "confirm": "បញ្ជាក់",
+    "yourOrder": "ពិនិត្យបញ្ជាទិញ"
+  },
+  "common": {
+    "selectLanguage": "ជ្រើសភាសា",
+    "search": "ស្វែងរក",
+    "menu": "ម៉ឺនុយ",
+    "cart": "រទេះ",
+    "total": "ចំនួនទឹកប្រាក់សរុប",
+    "quantity": "បរិមាណ",
+    "price": "តម្លៃ",
+    "items": "មុខម្ហូប",
+    "emptyCart": "រទេះរបស់អ្នកទទេ",
+    "orderHistory": "ប្រវត្តិបញ្ជាទិញ",
+    "dishesFound": "រកមិនឃើញមុខម្ហូបទេ",
+    "profile": "ប្រវត្តិរូប",
+    "settings": "ការកំណត់",
+    "logout": "ចាកចេញ",
+    "login": "ចូលគណនី",
+    "register": "ចុះឈ្មោះ"
+  },
+  "lang": {
+    "km": "ភាសាខ្មែរ",
+    "en": "អង់គ្លេស"
+  },
+  "orderStatus": {
+    "pending": "កំពុងរងចាំ",
+    "inProgress": "កំពុងដំណើរការ",
+    "completed": "បញ្ចប់",
+    "cancelled": "បានបោះបង់"
+  },
+  "notification": {
+    "addedToCart": "បានបន្ថែមទៅរទេះ",
+    "orderPlaced": "បញ្ជាទិញបានជោគជ័យ",
+    "orderCancelled": "បញ្ជាទិញបានបោះបង់"
+  },
+  "header": {
+    "orderTitle": "ការបញ្ជាទិញរបស់ខ្ញុំ"
+  }
+}

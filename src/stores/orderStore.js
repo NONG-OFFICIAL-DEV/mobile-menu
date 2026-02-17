@@ -1,0 +1,25 @@
+import { defineStore } from 'pinia'
+import orderService from '@/api/order'
+
+export const useOrderStore = defineStore('order', {
+  state: () => ({
+    orders: []
+  }),
+
+  actions: {
+    async createOrder(payload, loading) {
+      const res = await orderService.createOrder(payload, loading)
+      this.orders = res
+      return res
+    },
+    async fetchOrderByTable(tableNumber) {
+      const { data } = await orderService.getOrderByTable(tableNumber)
+      return data
+    },
+    async fetchAllOrders() {
+      const { data } = await orderService.getAllOrder()
+      this.orders = data
+      return data
+    }
+  }
+})
