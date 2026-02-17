@@ -50,6 +50,7 @@
     "limitOrder":"Only 5 orders per item can be ordered."
   },
   "header": {
-    "orderTitle": "My Orders"
+    "orderTitle": "My Orders",
+    "orderHistory":"Order History"
   }
 }
