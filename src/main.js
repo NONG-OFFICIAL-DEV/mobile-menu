@@ -12,6 +12,20 @@ import CustomTitle from "./components/global/CustomTitle.vue";
 const app = createApp(App)
 const pinia = createPinia()
 
+// disabled double click zoom
+let lastTouchEnd = 0
+document.addEventListener(
+  'touchend',
+  event => {
+    const now = new Date().getTime()
+    if (now - lastTouchEnd <= 300) {
+      event.preventDefault()
+    }
+    lastTouchEnd = now
+  },
+  { passive: false }
+)
+
 app.use(pinia)
 app.use(vuetify)
 app.use(router)

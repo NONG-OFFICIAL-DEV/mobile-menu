@@ -56,9 +56,6 @@
 
   body {
     font-family: 'Poppins', sans-serif;
-    touch-action: manipulation;
-    position: relative;
-    touch-action: pan-y;
   }
   ::-webkit-scrollbar {
     display: none;
