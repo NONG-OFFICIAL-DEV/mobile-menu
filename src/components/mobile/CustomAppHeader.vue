@@ -2,7 +2,7 @@
   <header class="app-header-wrapper">
     <div class="status-bar-safe"></div>
 
-    <div class="header-content d-flex align-center px-4">
+    <div class="header-content d-flex align-center px-4 py-2">
       <div class="header-left">
         <v-btn
           v-if="showBack && !$slots.left"
@@ -62,10 +62,6 @@
   .status-bar-safe {
     height: env(safe-area-inset-top);
     background: transparent;
-  }
-
-  .header-content {
-    height: 64px; /* Standard mobile header height */
   }
 
   .header-left,

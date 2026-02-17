@@ -2,7 +2,6 @@
   <div>
     <CustomAppHeader
       title="Order Tracker"
-      :subtitle="`Table ${props.tableNumber || '...' } • Live`"
       live
       @back="$emit('reset')"
     />

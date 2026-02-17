@@ -24,7 +24,7 @@
   defineEmits(['back', 'update', 'submit', 'clear'])
 
   const totalItems = computed(() => {
-    return prop.cart.reduce((sum, item) => sum + item.qty, 0)
+    return prop.cart.length
   })
 </script>
 
@@ -32,10 +32,9 @@
   <div class="cart-page-wrapper">
     <CustomAppHeader
       :title="t('header.orderTitle')"
-      :subtitle="`${totalItems} items selected`"
       :showBack="true"
       @back="$emit('back')"
-    >
+      >
       <template #right>
         <v-btn
           v-if="cart.length > 0"
