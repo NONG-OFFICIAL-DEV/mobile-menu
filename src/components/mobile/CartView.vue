@@ -34,14 +34,15 @@
       :title="t('header.orderTitle')"
       :showBack="true"
       @back="$emit('back')"
-      >
+    >
       <template #right>
         <v-btn
           v-if="cart.length > 0"
           icon="mdi-delete-outline"
           variant="text"
           color="error"
-          density="comfortable"
+          size="32"
+          class="action-btn"
           @click="$emit('clear')"
         />
       </template>
@@ -132,7 +133,7 @@
       <div class="d-flex justify-space-between align-end mb-4 px-2">
         <div>
           <span class="text-caption text-medium-emphasis d-block">
-           {{ t('common.total') }}
+            {{ t('common.total') }}
           </span>
           <span class="font-weight-black text-h5 text-primary">
             {{ formatCurrency(total) }}
@@ -140,7 +141,7 @@
         </div>
         <div class="text-right">
           <span class="text-caption text-medium-emphasis d-block">
-            {{ totalItems }}  {{ t('common.items') }}
+            {{ totalItems }} {{ t('common.items') }}
           </span>
           <span class="text-subtitle-2 font-weight-black">
             Table {{ tableNumber }}
@@ -226,5 +227,12 @@
   .cart-card {
     background: white !important;
     border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .action-btn {
+    background: white !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 12px !important;
   }
 </style>
