@@ -38,14 +38,20 @@
 </script>
 
 <style>
-  html {
+  html,
+  body {
     overflow-y: auto;
+    width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    height: 100%;
   }
 
   #app {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
@@ -58,8 +64,4 @@
     display: none;
   }
 
-  thead tr th {
-    font-size: 15px;
-    font-weight: bold;
-  }
 </style>
