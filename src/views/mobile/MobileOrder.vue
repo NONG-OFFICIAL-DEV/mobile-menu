@@ -11,6 +11,8 @@
   import CartButton from '@/components/mobile/CartButton.vue'
   import CartView from '@/components/mobile/CartView.vue'
   import TrackingView from '@/components/mobile/TrackingView.vue'
+  import SuccessPage from '@/components/mobile/SuccessPage.vue'
+  import CurrentOrder from '@/components/mobile/CurrentOrder.vue'
   import { useOrderStore } from '@/stores/orderStore'
   import { useMenuStore } from '@/stores/menuStore'
   import { useDiningTableStore } from '@/stores/diningTableStore'
@@ -77,7 +79,8 @@
       await menuStore.fetchMenus()
 
       // Navigate to tracking
-      page.value = 'tracking'
+      page.value = 'success'
+      // page.value = 'tracking'
     } catch (err) {
       console.error(err)
     } finally {
@@ -97,6 +100,12 @@
     // Clear page persistence on manual reset
     localStorage.removeItem('active_page')
     page.value = 'home'
+  }
+  function viewHistory() {
+    clearCart()
+    // Clear page persistence on manual reset
+    localStorage.removeItem('active_page')
+    page.value = 'history'
   }
   const search = ref('')
   function reFilter() {
@@ -123,6 +132,7 @@
     <AppHeader
       v-if="page === 'home'"
       @view-process="goToTracking"
+      @view-history="viewHistory"
       @view-cart="goToCart"
       :tableNumber="tableNumber"
       :cartCount="totalItems"
@@ -221,6 +231,17 @@
             @update="updateQty"
             @submit="placeOrder"
             @clear="clearCart"
+          />
+          <SuccessPage
+            v-else-if="page === 'success'"
+            @back="page = 'home'"
+            @reset="handleReset"
+            @view-history="viewHistory"
+          />
+
+          <CurrentOrder
+            v-else-if="page === 'history'"
+            @close="page = 'home'"
           />
 
           <TrackingView

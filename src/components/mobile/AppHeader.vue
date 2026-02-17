@@ -8,7 +8,7 @@
     search: String,
     cartCount: { type: Number, default: 0 }
   })
-  defineEmits(['view-process', 'view-cart', 'update:search'])
+  defineEmits(['view-process', 'view-cart', 'view-history', 'update:search'])
 </script>
 
 <template>
@@ -54,7 +54,7 @@
         </v-btn>
 
         <!-- Tracking -->
-        <v-btn
+        <!-- <v-btn
           class="action-btn"
           icon
           size="small"
@@ -62,6 +62,15 @@
           @click="$emit('view-process')"
         >
           <v-icon icon="mdi-room-service-outline" color="primary" size="22" />
+        </v-btn> -->
+        <v-btn
+          class="action-btn"
+          icon
+          size="small"
+          variant="flat"
+          @click="$emit('view-history')"
+        >
+          <v-icon icon="mdi-receipt-clock-outline" color="primary" size="22" />
         </v-btn>
         <LanguageBottomSheet :stackedBtn="false" :iconBtn="true" />
       </div>

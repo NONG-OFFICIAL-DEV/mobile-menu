@@ -63,10 +63,21 @@ export function useDate() {
       }
     }
   }
+  // ✅ NEW: Format date as "17 Feb 2026"
+  const formatDateText = (date = new Date(), locale = 'en') => {
+    const d = new Date(date)
+
+    const day = String(d.getDate()).padStart(2, '0')
+    const month = d.toLocaleString(locale, { month: 'short' }) // Feb
+    const year = d.getFullYear()
+
+    return `${day} ${month} ${year}`
+  }
 
   return {
     formatDate,
     formatDateTime,
+    formatDateText,
     addDays,
     formatLocalDate,
     formatTimeAgo
