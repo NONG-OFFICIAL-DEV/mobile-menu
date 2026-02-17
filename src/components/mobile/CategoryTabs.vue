@@ -40,10 +40,8 @@
             :class="isSelected ? 'text-white' : 'text-grey-darken-1 border'"
             rounded="pill"
             flat
-            class="ma-2 text-none font-weight-bold px-6"
-            height="40"
-            prepend-icon="mdi-food"
-            size="x-small"
+            class="ma-2 text-none font-weight-bold"
+            size="small"
             @click="select"
           >
             All
@@ -60,10 +58,8 @@
             :class="isSelected ? 'text-white' : 'text-grey-darken-1 border'"
             rounded="pill"
             flat
-            class="ma-2 text-none font-weight-bold px-6"
-            height="40"
-            prepend-icon="mdi-food"
-            size="x-small"
+            class="ma-2 text-none font-weight-bold"
+            size="small"
             @click="select"
           >
             {{ cat.name }}
