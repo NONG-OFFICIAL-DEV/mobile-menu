@@ -34,7 +34,7 @@ jobs:
             --build-arg VITE_APP_I18N_FALLBACK_LOCALE=en \
             -t $IMAGE_FRONTEND:latest \
             -t $IMAGE_FRONTEND:$IMAGE_TAG \
-            ../
+            .
 
           echo ">>> Pushing images"
           docker push $IMAGE_FRONTEND:latest
