@@ -5,7 +5,8 @@
   defineProps({
     categories: Array,
     modelValue: null,
-    search: String
+    search: String,
+    isLoading: Boolean
   })
 
   defineEmits(['update:modelValue', 'update:search'])
@@ -67,6 +68,14 @@
           >
             {{ cat.name }}
           </v-btn>
+        </v-slide-group-item>
+        <v-slide-group-item v-for="(item, n) in 12" :key="n" :value="n">
+          <v-skeleton-loader
+            v-if="isLoading"
+            width="100"
+            class="px-0 rounded-pill"
+            type="list-item"
+          ></v-skeleton-loader>
         </v-slide-group-item>
       </v-slide-group>
     </div>

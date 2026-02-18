@@ -54,15 +54,18 @@
   const tableNumber = ref(null)
   const tableId = ref(null)
   const order = ref({})
+  const isLoading = ref(false)
 
   onMounted(async () => {
+    isLoading.value = true
     await menuStore.fetchMenus()
+    await menuCategoryStore.fetchAllMenuCategory({ loading: 'skeleton' })
+    isLoading.value = false
     const res = await diningTableStore.getTableNumberByToken(token)
     tableNumber.value = res.table.table_number
     tableId.value = res.table.id
     order.value = await orderStore.fetchOrderByTable(res.table.id)
 
-    await menuCategoryStore.fetchAllMenuCategory({ loading: 'skeleton' })
 
     // If user refresh cart but cart empty -> go home
     if (route.name === 'menu.cart' && cart.value.length === 0) {
@@ -96,6 +99,7 @@
     <div class="sticky-nav bg-white shadow-sm">
       <CategoryTabs
         :categories="menuCategoryStore.items"
+        :isLoading="isLoading"
         v-model="selectedCategory"
         v-model:search="search"
       />
@@ -105,7 +109,7 @@
       <v-row>
         <!-- Skeleton -->
         <template
-          v-if="loadingStore.isLoading && loadingStore.mode === 'skeleton'"
+          v-if="isLoading && loadingStore.mode === 'skeleton'"
         >
           <v-col v-for="n in 6" :key="n" cols="6" class="pa-2">
             <v-card flat rounded="xl" class="pa-3 bg-white">
