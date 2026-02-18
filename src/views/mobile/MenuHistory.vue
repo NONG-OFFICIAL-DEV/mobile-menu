@@ -2,10 +2,8 @@
   import { useRouter, useRoute } from 'vue-router'
   import CurrentOrder from '@/components/mobile/CurrentOrder.vue'
   import { useCart } from '@/composables/useCart'
-  import { useLoadingStore } from '@/stores/loadingStore'
 
   const { clearCart } = useCart()
-  const loadingStore = useLoadingStore()
 
   const router = useRouter()
   const route = useRoute()

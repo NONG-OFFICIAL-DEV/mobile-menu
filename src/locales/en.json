@@ -2,7 +2,7 @@
   "btn": {
     "filter": "Filter",
     "reFilter": "Clear Search",
-    "create": "Create",
+    "done": "Done",
     "save": "Save",
     "cancel": "Cancel",
     "edit": "Edit",
@@ -29,8 +29,12 @@
     "dishesFound": "No dishes found",
     "all": "All",
     "scan": "Scan the menu and place your first order.",
-    "logout": "Logout",
-    "login": "Login",
+    "orderedItems": "Ordered Items",
+    "date": "Date",
+    "discount": "Discount",
+    "subtotal": "Subtotal",
+    "orderId": "Order ID",
+    "orderqId": "Order ID",
     "table": "Register"
   },
   "lang": {
@@ -47,10 +51,13 @@
     "addedToCart": "Added to cart",
     "orderPlaced": "Order placed successfully",
     "orderCancelled": "Order cancelled",
-    "limitOrder":"Only 5 orders per item can be ordered."
+    "limitOrder": "Only 5 orders per item can be ordered."
+  },
+  "message": {
+    "thank": "Thank you for your order!"
   },
   "header": {
     "orderTitle": "My Orders",
-    "orderHistory":"Order History"
+    "orderHistory": "Order History"
   }
 }

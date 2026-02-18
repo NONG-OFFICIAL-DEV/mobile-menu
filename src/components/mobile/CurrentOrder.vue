@@ -46,19 +46,19 @@
   <v-container class="max-width-500 pa-4">
     <v-card variant="flat" class="receipt-paper pa-6 rounded-0 shadow-lg">
       <div class="text-center mb-6">
-        <h2 class="text-h6 font-weight-black text-uppercase">Ordered Items</h2>
+        <h2 class="text-h6 font-weight-black text-uppercase">{{ t('common.orderedItems') }}</h2>
         <div class="text-caption">
-          Date: {{ formatDateText(order.order_date) }}
+          {{ t('common.date') }}: {{ formatDateText(order.order_date) }}
         </div>
-        <div class="text-caption">Order ID: #{{ order.order_no }}</div>
+        <div class="text-caption">{{ t('common.orderId') }}: #{{ order.order_no }}</div>
       </div>
       <div class="receipt-divider mb-4"></div>
       <v-table density="compact" class="bg-transparent mb-4">
         <thead>
           <tr>
-            <th class="text-left text-caption px-0" width="150">ITEM</th>
-            <th class="text-center text-caption px-0">QTY</th>
-            <th class="text-right text-caption px-0">TOTAL</th>
+            <th class="text-left text-caption px-0" width="150">{{ t('common.items') }}</th>
+            <th class="text-center text-caption px-0">{{ t('common.quantity') }}</th>
+            <th class="text-right text-caption px-0">{{ t('common.total') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -80,16 +80,16 @@
       <div class="receipt-divider mb-4"></div>
 
       <div class="d-flex justify-space-between mb-1">
-        <span class="text-body-2">Subtotal</span>
+        <span class="text-body-2">{{ t('common.subtotal') }}</span>
         <span class="text-body-2">{{ formatCurrency(totalAmount) }}</span>
       </div>
       <div class="d-flex justify-space-between mb-4">
-        <span class="text-body-2">Tax</span>
+        <span class="text-body-2">{{ t('common.discount') }}</span>
         <span class="text-body-2">$0.00</span>
       </div>
 
       <div class="d-flex justify-space-between align-center">
-        <span class="text-h6 font-weight-black">TOTAL</span>
+        <span class="text-h6 font-weight-black">{{ t('common.total') }}</span>
         <span class="text-h6 font-weight-black text-primary">
           {{ formatCurrency(totalAmount) }}
         </span>
@@ -99,7 +99,7 @@
 
       <div class="text-center">
         <v-icon size="64" color="grey-lighten-2">mdi-barcode</v-icon>
-        <div class="text-caption text-grey mt-2">THANK YOU FOR YOUR ORDER</div>
+        <div class="text-caption text-grey mt-2 text-uppercase">{{ t('message.thank') }}</div>
       </div>
     </v-card>
 
@@ -110,7 +110,7 @@
       size="large"
       @click="$emit('close')"
     >
-      Done
+      {{ t('btn.done') }}
     </v-btn>
   </v-container>
 </template>

@@ -188,13 +188,16 @@
   >
     <div class="d-flex align-center">
       <v-icon start icon="mdi-alert-circle" />
-      <span>{{t('notification.limitOrder')}}</span>
+      <span>{{ t('notification.limitOrder') }}</span>
     </div>
   </v-snackbar>
 
   <!-- Product Grid -->
   <v-row class="pa-2">
-    <transition-group name="list-stagger">
+    <transition-group
+      name="card-pop"
+      appear
+    >
       <v-col v-for="p in items" :key="p.id" cols="6" class="pa-2">
         <v-card flat rounded="xl" class="pa-3 product-card border">
           <v-img
@@ -426,5 +429,36 @@
 
   .v-btn--disabled {
     opacity: 0.4;
+  }
+
+  /* Standard Transitions */
+  .card-pop-enter-active {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  }
+  .card-pop-enter-from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  .reveal-up-enter-active {
+    transition: all 0.6s ease-out;
+  }
+  .reveal-up-enter-from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .card-pop-leave-active {
+    animation: pop-in 0.2s reverse;
+  }
+
+  @keyframes pop-in {
+    0% {
+      transform: scale(0.5) translateY(100px);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
   }
 </style>
