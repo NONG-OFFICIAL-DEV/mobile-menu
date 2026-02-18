@@ -46,24 +46,49 @@
   <v-container class="max-width-500 pa-4">
     <v-card variant="flat" class="receipt-paper pa-6 rounded-0 shadow-lg">
       <div class="text-center mb-6">
-        <h2 class="text-h6 font-weight-black text-uppercase">{{ t('common.orderedItems') }}</h2>
+        <h2 class="text-h6 font-weight-black text-uppercase">
+          {{ t('common.orderedItems') }}
+        </h2>
         <div class="text-caption">
           {{ t('common.date') }}: {{ formatDateText(order.order_date) }}
         </div>
-        <div class="text-caption">{{ t('common.orderId') }}: #{{ order.order_no }}</div>
+        <div class="text-caption">
+          {{ t('common.orderId') }}: #{{ order.order_no }}
+        </div>
       </div>
       <div class="receipt-divider mb-4"></div>
       <v-table density="compact" class="bg-transparent mb-4">
         <thead>
           <tr>
-            <th class="text-left text-caption px-0" width="150">{{ t('common.items') }}</th>
-            <th class="text-center text-caption px-0">{{ t('common.quantity') }}</th>
-            <th class="text-right text-caption px-0">{{ t('common.total') }}</th>
+            <th class="text-left text-caption px-0" width="150">
+              {{ t('common.items') }}
+            </th>
+            <th class="text-center text-caption px-0">
+              {{ t('common.quantity') }}
+            </th>
+            <th class="text-right text-caption px-0">
+              {{ t('common.total') }}
+            </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="item in order.items" :key="item.id">
-            <td class="text-body-2 font-weight-bold px-0" width="150">{{ item.name }}</td>
+            <td class="text-body-2 font-weight-bold px-0" width="150">
+              {{ item.name }}
+              <div
+                v-if="item.variant_name"
+                class="text-caption text-grey-darken-1"
+              >
+                {{ item.variant_name }}
+              </div>
+
+              <div
+                v-if="item.note"
+                class="text-caption text-primary italic-note"
+              >
+                {{ item.note }}
+              </div>
+            </td>
             <td class="text-center text-body-2 px-0">{{ item.qty }}</td>
             <td class="text-right text-body-2 px-0">
               {{ formatCurrency(item.price * item.qty) }}
@@ -99,7 +124,9 @@
 
       <div class="text-center">
         <v-icon size="64" color="grey-lighten-2">mdi-barcode</v-icon>
-        <div class="text-caption text-grey mt-2 text-uppercase">{{ t('message.thank') }}</div>
+        <div class="text-caption text-grey mt-2 text-uppercase">
+          {{ t('message.thank') }}
+        </div>
       </div>
     </v-card>
 

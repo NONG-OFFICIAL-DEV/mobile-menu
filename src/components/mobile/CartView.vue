@@ -1,5 +1,5 @@
 <script setup>
-  import { computed } from 'vue'
+  import { computed, ref } from 'vue'
   import { useCurrency } from '@/composables/useCurrency.js'
   import CustomAppHeader from './CustomAppHeader.vue'
   import { useI18n } from 'vue-i18n'
@@ -17,15 +17,33 @@
       type: Number,
       default: 0
     },
-    tableNumber: String,
+    tableNumber: Number,
     loading: Boolean
   })
-
-  defineEmits(['back', 'update', 'submit', 'clear'])
+  const emit = defineEmits(['back', 'update', 'submit', 'clear', 'update-note'])
 
   const totalItems = computed(() => {
     return prop.cart.length
   })
+  const noteDialog = ref(false)
+  const selectedItem = ref(null)
+  const noteText = ref('')
+
+  function openNote(item) {
+    selectedItem.value = item
+    noteText.value = item.note || ''
+    noteDialog.value = true
+  }
+
+  function saveNote() {
+    if (!selectedItem.value) return
+
+    // Emit to parent to update cart item note
+    // We pass itemId + note
+    emit('update-note', selectedItem.value.id, noteText.value)
+
+    noteDialog.value = false
+  }
 </script>
 
 <template>
@@ -92,6 +110,7 @@
                   <div class="font-weight-black text-body-1 line-height-tight">
                     {{ item.name }}
                   </div>
+
                   <div
                     class="text-caption text-grey-darken-1 mt-1"
                     v-if="item.has_variants"
@@ -101,20 +120,41 @@
                       | {{ item.customizations.sugar }}% Sugar
                     </span>
                   </div>
+
+                  <div
+                    v-if="item.note"
+                    class="text-caption text-primary font-italic mt-1 d-flex align-center"
+                  >
+                    <v-icon size="14" class="mr-1">
+                      mdi-note-text-outline
+                    </v-icon>
+                    {{ item.note }}
+                  </div>
                 </div>
-                <div
-                  class="text-teal-darken-3 font-weight-black text-subtitle-1"
+
+                <v-btn 
+                  icon="mdi-note-edit-outline"
+                  variant="tonal"
+                  :color="item.note ? 'primary' : 'grey-lighten'"
+                  size="32"
+                  class="rounded-lg flex-shrink-0"
+                  @click="openNote(item)"
                 >
-                  {{ formatCurrency(item.price * item.qty) }}
-                </div>
+              </v-btn>
               </div>
 
               <div class="mt-auto d-flex justify-space-between align-center">
-                <div
-                  class="text-caption font-weight-bold text-grey-darken-1 bg-grey-lighten-4 px-2 py-0.5 rounded"
-                >
-                  {{ formatCurrency(item.price) }}
+                <div class="d-flex flex-column">
+                  <span
+                    class="text-teal-darken-3 font-weight-black text-subtitle-1"
+                  >
+                    {{ formatCurrency(item.price * item.qty) }}
+                  </span>
+                  <span class="text-caption text-grey-darken-1">
+                    {{ formatCurrency(item.price) }} / {{ t('common.items') }}
+                  </span>
                 </div>
+
                 <QtyStepper
                   :modelValue="item.qty"
                   small
@@ -166,10 +206,55 @@
         <v-icon end class="ml-2">mdi-chevron-right</v-icon>
       </v-btn>
     </footer>
+
+    <v-bottom-sheet v-model="noteDialog">
+      <v-card class="rounded-t-xl">
+        <!-- Drag handle -->
+        <div class="d-flex justify-center pt-3">
+          <div class="close-bar bg-grey-lighten-2 rounded-pill"></div>
+        </div>
+
+        <v-card-title class="font-weight-black pt-2">
+          {{ t('common.noteFor') }}
+          <div class="text-caption text-grey-darken-1 mt-1">
+            {{ selectedItem?.name }}
+          </div>
+        </v-card-title>
+
+        <v-card-text>
+          <v-textarea
+            v-model="noteText"
+            auto-grow
+            rows="2"
+            counter="100"
+            maxlength="100"
+            :placeholder="t('common.notePlaceholder')"
+            variant="outlined"
+            rounded="lg"
+          />
+        </v-card-text>
+
+        <v-card-actions class="px-4 pb-6">
+          <v-btn variant="text" rounded="pill" @click="noteDialog = false">
+            {{ t('btn.cancel') }}
+          </v-btn>
+
+          <v-spacer />
+
+          <v-btn color="primary" rounded="pill" @click="saveNote">
+            {{ t('btn.save') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-bottom-sheet>
   </div>
 </template>
 
 <style scoped>
+  .close-bar {
+    width: 40px;
+    height: 5px;
+  }
   .cart-page-wrapper {
     display: flex;
     flex-direction: column;

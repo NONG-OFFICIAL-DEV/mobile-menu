@@ -7,7 +7,7 @@
   const { totalItems } = useCart()
 
   defineProps({
-    tableNumber: { type: String, default: '00' },
+    tableNumber: Number,
     search: String,
     isOrder: Object
   })

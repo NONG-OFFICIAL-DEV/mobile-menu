@@ -7,12 +7,12 @@
   import { useCart } from '@/composables/useCart'
   import { useOrderStore } from '@/stores/orderStore'
   import { useMenuStore } from '@/stores/menuStore'
-  
+
   const router = useRouter()
   const route = useRoute()
   const token = route.params.token
-  const tableNumber = localStorage.getItem('tableNumber')
-
+  const tableNumber = Number(localStorage.getItem('tableNumber'))
+  
   const orderStore = useOrderStore()
   const menuStore = useMenuStore()
 
@@ -45,6 +45,10 @@
       isOrdering.value = false
     }
   }
+  function handleUpdateNote(itemId, note) {
+    const item = cart.value.find(i => i.id === itemId)
+    if (item) item.note = note
+  }
 
   function goBack() {
     router.push({ name: 'menu.home', params: { token } })
@@ -62,6 +66,7 @@
       @update="updateQty"
       @submit="placeOrder"
       @clear="clearCart"
+      @update-note="handleUpdateNote"
     />
   </div>
 </template>

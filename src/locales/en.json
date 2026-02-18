@@ -13,7 +13,9 @@
     "back": "Back",
     "next": "Next",
     "confirm": "Confirm",
-    "yourOrder": "Your Order"
+    "yourOrder": "Your Order",
+    "orderMore": "Order More",
+    "viewHistory": "View All Placed Orders"
   },
   "common": {
     "selectLanguage": "Select Language",
@@ -35,7 +37,11 @@
     "subtotal": "Subtotal",
     "orderId": "Order ID",
     "orderqId": "Order ID",
-    "table": "Register"
+    "table": "Table",
+    "addNote": "Add note",
+    "editNote": "Edit note",
+    "noteFor": "Note for",
+    "notePlaceholder": "Example: No spicy, no sugar, extra sauce..."
   },
   "lang": {
     "km": "Khmer",
@@ -54,7 +60,10 @@
     "limitOrder": "Only 5 orders per item can be ordered."
   },
   "message": {
-    "thank": "Thank you for your order!"
+    "thank": "Thank you for your order!",
+    "confirmed": "Order Confirmed!",
+    "wating": "Your order has been sent to the kitchen.",
+    "ready": "We'll notify you when it's ready."
   },
   "header": {
     "orderTitle": "My Orders",

@@ -156,7 +156,7 @@
   const steamStore = useOrderStream()
 
   const props = defineProps({
-    tableNumber: String,
+    tableNumber: Number,
     tableId: Number
   })
 

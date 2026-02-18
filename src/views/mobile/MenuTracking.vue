@@ -6,7 +6,7 @@ import TrackingView from '@/components/mobile/TrackingView.vue'
 import { useCart } from '@/composables/useCart'
 
 const props = defineProps({
-  tableNumber: String,
+  tableNumber: Number,
   tableId: Number
 })
 
