@@ -2,11 +2,14 @@
   import LanguageBottomSheet from '../customs/LanguageBottomSheet.vue'
   import { useI18n } from 'vue-i18n'
   const { t } = useI18n()
-  
+  import { useCart } from '@/composables/useCart'
+
+  const { totalItems } = useCart()
+
   defineProps({
     tableNumber: { type: String, default: '00' },
     search: String,
-    cartCount: { type: Number, default: 0 }
+    isOrder: Object
   })
   defineEmits(['view-process', 'view-cart', 'view-history', 'update:search'])
 </script>
@@ -36,7 +39,7 @@
       <div class="d-flex align-center ga-2">
         <!-- Cart -->
         <v-btn
-          v-if="cartCount"
+          v-if="totalItems"
           class="action-btn"
           icon
           variant="flat"
@@ -44,8 +47,8 @@
           @click="$emit('view-cart')"
         >
           <v-badge
-            :content="cartCount"
-            :model-value="cartCount > 0"
+            :content="totalItems"
+            :model-value="totalItems > 0"
             color="primary"
             location="top end"
           >
@@ -64,6 +67,7 @@
           <v-icon icon="mdi-room-service-outline" color="primary" size="22" />
         </v-btn> -->
         <v-btn
+          v-if="isOrder.items?.length > 0"
           class="action-btn"
           icon
           size="small"

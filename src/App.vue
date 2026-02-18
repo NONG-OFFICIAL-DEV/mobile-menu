@@ -1,6 +1,5 @@
 <template>
   <v-app>
-    <!-- <token-expired /> -->
     <Notif ref="notifRef" dismissible :default-timeout="2000" />
     <Confirm ref="confirmRef" />
     <router-view />
@@ -13,7 +12,6 @@
   import Notif from '@/components/global/Notification.vue'
   import Confirm from '@/components/global/Confirm.vue'
   import Loading from '@/components/global/Loading.vue'
-  // import TokenExpired from '@/components/common/TokenExpired.vue'
 
   // Refs to components
   const notifRef = ref(null)

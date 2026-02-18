@@ -6,6 +6,11 @@
   import { useI18n } from 'vue-i18n'
   import { useRoute } from 'vue-router'
   import { useDate } from '@/composables/useDate'
+  import { useLoadingStore } from '@/stores/loadingStore'
+  import { useCurrency } from '@/composables/useCurrency.js'
+
+  const loadingStore = useLoadingStore()
+  const { formatCurrency } = useCurrency()
 
   defineEmits(['close'])
   const { t } = useI18n()
@@ -17,9 +22,10 @@
   const order = ref({})
 
   const totalAmount = computed(() => {
-    return (order.value.items ?? [])
-      .reduce((sum, item) => sum + item.price * item.qty, 0)
-      .toFixed(2)
+    return (order.value.items ?? []).reduce(
+      (sum, item) => sum + item.price * item.qty,
+      0
+    )
   })
 
   onMounted(async () => {
@@ -41,36 +47,41 @@
     <v-card variant="flat" class="receipt-paper pa-6 rounded-0 shadow-lg">
       <div class="text-center mb-6">
         <h2 class="text-h6 font-weight-black text-uppercase">Ordered Items</h2>
-        <div class="text-caption">Date: {{ formatDateText(order.order_date) }}</div>
+        <div class="text-caption">
+          Date: {{ formatDateText(order.order_date) }}
+        </div>
         <div class="text-caption">Order ID: #{{ order.order_no }}</div>
       </div>
-
       <div class="receipt-divider mb-4"></div>
-
       <v-table density="compact" class="bg-transparent mb-4">
         <thead>
           <tr>
-            <th class="text-left text-caption px-0">ITEM</th>
+            <th class="text-left text-caption px-0" width="150">ITEM</th>
             <th class="text-center text-caption px-0">QTY</th>
             <th class="text-right text-caption px-0">TOTAL</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="item in order.items" :key="item.id">
-            <td class="text-body-2 font-weight-bold px-0">{{ item.name }}</td>
+            <td class="text-body-2 font-weight-bold px-0" width="150">{{ item.name }}</td>
             <td class="text-center text-body-2 px-0">{{ item.qty }}</td>
             <td class="text-right text-body-2 px-0">
-              ${{ (item.price * item.qty).toFixed(2) }}
+              {{ formatCurrency(item.price * item.qty) }}
             </td>
           </tr>
         </tbody>
       </v-table>
+      <v-skeleton-loader
+        v-if="loadingStore.isLoading"
+        class="bg-transparent mb-4"
+        type="table-row@4"
+      ></v-skeleton-loader>
 
       <div class="receipt-divider mb-4"></div>
 
       <div class="d-flex justify-space-between mb-1">
         <span class="text-body-2">Subtotal</span>
-        <span class="text-body-2">${{ totalAmount }}</span>
+        <span class="text-body-2">{{ formatCurrency(totalAmount) }}</span>
       </div>
       <div class="d-flex justify-space-between mb-4">
         <span class="text-body-2">Tax</span>
@@ -80,7 +91,7 @@
       <div class="d-flex justify-space-between align-center">
         <span class="text-h6 font-weight-black">TOTAL</span>
         <span class="text-h6 font-weight-black text-primary">
-          ${{ totalAmount }}
+          {{ formatCurrency(totalAmount) }}
         </span>
       </div>
 

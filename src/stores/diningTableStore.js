@@ -48,6 +48,7 @@ export const useDiningTableStore = defineStore('diningTable', {
 
     async getTableNumberByToken(token) {
       const res = await tableService.getTableNumberByToken(token)
+      localStorage.setItem('tableNumber', res.data.table.table_number)
       return res.data
     },
     async showQRCode(tableId) {

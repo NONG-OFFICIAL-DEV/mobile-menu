@@ -1,16 +1,3 @@
-// import { defineStore } from 'pinia'
-
-// export const useLoadingStore = defineStore('loading', {
-//   state: () => ({
-//     isLoading: false
-//   }),
-//   actions:{
-//     setLoading(payload){
-//       this.isLoading = payload
-//     }
-//   }
-// })
-
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
