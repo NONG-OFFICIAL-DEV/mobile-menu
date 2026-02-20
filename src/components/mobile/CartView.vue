@@ -1,327 +1,531 @@
 <script setup>
-  import { computed, ref } from 'vue'
-  import { useCurrency } from '@/composables/useCurrency.js'
-  import CustomAppHeader from './CustomAppHeader.vue'
-  import { useI18n } from 'vue-i18n'
+  import { ref } from 'vue'
 
-  const { t } = useI18n()
-  import QtyStepper from '../customs/QtyStepper.vue'
-  const { formatCurrency } = useCurrency()
-
-  const prop = defineProps({
-    cart: {
-      type: Array,
-      default: () => []
-    },
-    total: {
-      type: Number,
-      default: 0
-    },
-    tableNumber: Number,
-    loading: Boolean
+  const props = defineProps({
+    cart: { type: Array, default: () => [] },
+    total: { type: [Number, String], default: 0 },
+    tableNumber: { type: Number, default: null },
+    loading: { type: Boolean, default: false },
   })
+
   const emit = defineEmits(['back', 'update', 'submit', 'clear', 'update-note'])
 
-  const totalItems = computed(() => {
-    return prop.cart.length
-  })
-  const noteDialog = ref(false)
-  const selectedItem = ref(null)
-  const noteText = ref('')
+  // Note editing
+  const noteItemId = ref(null)
+  const noteValue = ref('')
 
   function openNote(item) {
-    selectedItem.value = item
-    noteText.value = item.note || ''
-    noteDialog.value = true
+    noteItemId.value = item.id
+    noteValue.value = item.note || ''
   }
 
   function saveNote() {
-    if (!selectedItem.value) return
-
-    // Emit to parent to update cart item note
-    // We pass itemId + note
-    emit('update-note', selectedItem.value.id, noteText.value)
-
-    noteDialog.value = false
+    emit('update-note', noteItemId.value, noteValue.value)
+    noteItemId.value = null
   }
+
+  function cancelNote() {
+    noteItemId.value = null
+  }
+
+  // Clear confirm dialog
+  const showClearDialog = ref(false)
+  function confirmClear() {
+    showClearDialog.value = false
+    emit('clear')
+  }
+
+  const SERVICE_FEE = 0.5
+  const computedTotal = () => Number(props.total) + SERVICE_FEE
 </script>
 
 <template>
-  <div class="cart-page-wrapper">
-    <CustomAppHeader
-      :title="t('header.orderTitle')"
-      :showBack="true"
-      @back="$emit('back')"
-    >
-      <template #right>
-        <v-btn
-          v-if="cart.length > 0"
-          icon="mdi-delete-outline"
-          variant="text"
-          color="error"
-          size="32"
-          class="action-btn"
-          @click="$emit('clear')"
-        />
-      </template>
-    </CustomAppHeader>
+  <div class="cart-page">
 
-    <main class="scroll-content pa-4">
-      <v-fade-transition hide-on-leave>
-        <div v-if="cart.length === 0" class="text-center py-12">
-          <v-avatar color="grey-lighten-4" size="80" class="mb-4">
-            <v-icon size="40" color="grey-lighten-1">mdi-basket-outline</v-icon>
-          </v-avatar>
-          <p class="text-body-2 text-medium-emphasis">
-            {{ t('common.emptyCart') }}
-          </p>
-          <v-btn
-            color="primary"
-            class="mt-4"
-            block
-            rounded="pill"
-            elevation="1"
-            @click="$emit('back')"
-          >
-            {{ t('btn.order') }}
-          </v-btn>
-        </div>
-      </v-fade-transition>
+    <!-- ── HEADER ── -->
+    <div class="cart-header px-4 py-3 d-flex align-center">
+      <v-btn
+        icon
+        variant="flat"
+        size="small"
+        class="back-btn mr-3"
+        @click="$emit('back')"
+      >
+        <v-icon size="20" color="#1C1C1E">mdi-arrow-left</v-icon>
+      </v-btn>
 
-      <div v-if="cart.length > 0">
-        <v-card
-          v-for="item in cart"
-          :key="item.id"
-          flat
-          class="cart-card mb-4 border rounded-xl"
-        >
-          <div class="d-flex pa-3">
-            <v-img
-              :src="item.image_url"
-              width="90"
-              height="90"
-              cover
-              class="rounded-lg flex-grow-0 shadow-sm border"
-            />
-
-            <div class="ml-4 flex-grow-1 d-flex flex-column">
-              <div class="d-flex justify-space-between align-start mb-1">
-                <div class="pr-2">
-                  <div class="font-weight-black text-body-1 line-height-tight">
-                    {{ item.name }}
-                  </div>
-
-                  <div
-                    class="text-caption text-grey-darken-1 mt-1"
-                    v-if="item.has_variants"
-                  >
-                    {{ item.customizations.variant_name }}
-                    <span v-if="item.customizations.sugar">
-                      | {{ item.customizations.sugar }}% Sugar
-                    </span>
-                  </div>
-
-                  <div
-                    v-if="item.note"
-                    class="text-caption text-primary font-italic mt-1 d-flex align-center"
-                  >
-                    <v-icon size="14" class="mr-1">
-                      mdi-note-text-outline
-                    </v-icon>
-                    {{ item.note }}
-                  </div>
-                </div>
-
-                <v-btn 
-                  icon="mdi-note-edit-outline"
-                  variant="tonal"
-                  :color="item.note ? 'primary' : 'grey-lighten'"
-                  size="32"
-                  class="rounded-lg flex-shrink-0"
-                  @click="openNote(item)"
-                >
-              </v-btn>
-              </div>
-
-              <div class="mt-auto d-flex justify-space-between align-center">
-                <div class="d-flex flex-column">
-                  <span
-                    class="text-teal-darken-3 font-weight-black text-subtitle-1"
-                  >
-                    {{ formatCurrency(item.price * item.qty) }}
-                  </span>
-                  <span class="text-caption text-grey-darken-1">
-                    {{ formatCurrency(item.price) }} / {{ t('common.items') }}
-                  </span>
-                </div>
-
-                <QtyStepper
-                  :modelValue="item.qty"
-                  small
-                  strict
-                  :max="5"
-                  :min="0"
-                  @change="delta => $emit('update', item.id, delta)"
-                />
-              </div>
-            </div>
-          </div>
-        </v-card>
-      </div>
-    </main>
-
-    <footer
-      v-if="cart.length > 0"
-      class="fixed-footer pa-4 rounded-t-xl shadow-top"
-    >
-      <div class="d-flex justify-space-between align-end mb-4 px-2">
-        <div>
-          <span class="text-caption text-medium-emphasis d-block">
-            {{ t('common.total') }}
-          </span>
-          <span class="font-weight-black text-h5 text-primary">
-            {{ formatCurrency(total) }}
-          </span>
-        </div>
-        <div class="text-right">
-          <span class="text-caption text-medium-emphasis d-block">
-            {{ totalItems }} {{ t('common.items') }}
-          </span>
-          <span class="text-subtitle-2 font-weight-black">
-            {{ t('common.table') }} {{ tableNumber }}
-          </span>
-        </div>
+      <div class="flex-grow-1">
+        <div class="header-title">Your Cart</div>
+        <div class="header-sub">Table {{ tableNumber }} · {{ cart.length }} item{{ cart.length !== 1 ? 's' : '' }}</div>
       </div>
 
       <v-btn
-        block
-        color="primary"
-        size="large"
-        rounded="pill"
-        class="elevation-1 checkout-btn"
-        :loading="loading"
-        @click="$emit('submit')"
+        v-if="cart.length"
+        variant="text"
+        size="small"
+        color="error"
+        class="clear-btn"
+        @click="showClearDialog = true"
       >
-        {{ t('btn.placeOrder') }}
-        <v-icon end class="ml-2">mdi-chevron-right</v-icon>
+        Clear all
       </v-btn>
-    </footer>
+    </div>
 
-    <v-bottom-sheet v-model="noteDialog">
-      <v-card class="rounded-t-xl">
-        <!-- Drag handle -->
-        <div class="d-flex justify-center pt-3">
-          <div class="close-bar bg-grey-lighten-2 rounded-pill"></div>
+    <!-- ── CART ITEMS ── -->
+    <div class="cart-content px-4 pb-36">
+
+      <!-- Empty state -->
+      <div v-if="cart.length === 0" class="empty-cart d-flex flex-column align-center justify-center py-20">
+        <div class="empty-icon-wrap mb-5">
+          <v-icon size="44" color="#2D7A6E" style="opacity:0.5">mdi-cart-outline</v-icon>
+        </div>
+        <p class="text-subtitle-1 font-weight-bold text-center mb-1">Your cart is empty</p>
+        <p class="text-caption text-medium-emphasis text-center mb-5">Add some dishes from the menu</p>
+        <v-btn
+          color="#2D7A6E"
+          variant="tonal"
+          rounded="pill"
+          prepend-icon="mdi-silverware-fork-knife"
+          @click="$emit('back')"
+        >
+          Browse Menu
+        </v-btn>
+      </div>
+
+      <!-- Item list -->
+      <template v-else>
+        <transition-group name="cart-item" tag="div">
+          <div
+            v-for="item in cart"
+            :key="item.id"
+            class="cart-item-card mb-3"
+          >
+            <!-- Image + Info -->
+            <div class="d-flex align-start gap-3">
+              <v-avatar
+                size="68"
+                rounded="xl"
+                class="item-img flex-shrink-0"
+              >
+                <v-img
+                  :src="item.image_url || item.image"
+                  :alt="item.name"
+                  cover
+                >
+                  <template #placeholder>
+                    <div class="fill-height d-flex align-center justify-center" style="background:#EEF6F4">
+                      <v-icon color="#2D7A6E" style="opacity:0.4">mdi-silverware-fork-knife</v-icon>
+                    </div>
+                  </template>
+                </v-img>
+              </v-avatar>
+
+              <div class="flex-grow-1 item-info">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-price mt-1">${{ Number(item.price).toFixed(2) }}</div>
+
+                <!-- Note preview -->
+                <div
+                  v-if="item.note"
+                  class="note-preview mt-1 d-flex align-center gap-1"
+                  @click="openNote(item)"
+                >
+                  <v-icon size="12" color="#8E8E93">mdi-note-text-outline</v-icon>
+                  <span class="note-text">{{ item.note }}</span>
+                </div>
+                <div v-else class="add-note mt-1" @click="openNote(item)">
+                  + Add note
+                </div>
+              </div>
+
+              <!-- QTY controls -->
+              <div class="qty-col d-flex flex-column align-end justify-between">
+                <div class="subtotal">${{ (Number(item.price) * item.qty).toFixed(2) }}</div>
+                <div class="qty-ctrl d-flex align-center gap-1 mt-2">
+                  <v-btn
+                    icon
+                    size="x-small"
+                    variant="tonal"
+                    color="grey"
+                    class="qty-btn"
+                    @click="$emit('update', { item, qty: item.qty - 1 })"
+                  >
+                    <v-icon size="13">{{ item.qty === 1 ? 'mdi-trash-can-outline' : 'mdi-minus' }}</v-icon>
+                  </v-btn>
+                  <span class="qty-num">{{ item.qty }}</span>
+                  <v-btn
+                    icon
+                    size="x-small"
+                    color="#2D7A6E"
+                    variant="flat"
+                    class="qty-btn"
+                    @click="$emit('update', { item, qty: item.qty + 1 })"
+                  >
+                    <v-icon size="13">mdi-plus</v-icon>
+                  </v-btn>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition-group>
+
+        <!-- ── ORDER SUMMARY ── -->
+        <div class="summary-card mt-4">
+          <div class="summary-title mb-3">Order Summary</div>
+
+          <div class="summary-row">
+            <span class="summary-label">Subtotal</span>
+            <span class="summary-value">${{ Number(total).toFixed(2) }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Service fee</span>
+            <span class="summary-value">${{ SERVICE_FEE.toFixed(2) }}</span>
+          </div>
+          <v-divider class="my-3" />
+          <div class="summary-row total-row">
+            <span>Total</span>
+            <span class="total-price">${{ computedTotal().toFixed(2) }}</span>
+          </div>
         </div>
 
-        <v-card-title class="font-weight-black pt-2">
-          {{ t('common.noteFor') }}
-          <div class="text-caption text-grey-darken-1 mt-1">
-            {{ selectedItem?.name }}
-          </div>
-        </v-card-title>
+        <!-- ── NOTICE ── -->
+        <v-alert
+          density="compact"
+          variant="tonal"
+          color="#2D7A6E"
+          rounded="xl"
+          class="mt-4"
+          icon="mdi-information-outline"
+        >
+          <span class="text-caption">Your order will be sent to the kitchen. Please wait at your table.</span>
+        </v-alert>
+      </template>
+    </div>
 
-        <v-card-text>
-          <v-textarea
-            v-model="noteText"
-            auto-grow
-            rows="2"
-            counter="100"
-            maxlength="100"
-            :placeholder="t('common.notePlaceholder')"
-            variant="outlined"
-            rounded="lg"
-          />
-        </v-card-text>
+    <!-- ── PLACE ORDER BUTTON ── -->
+    <div v-if="cart.length" class="order-bar px-4 py-4">
+      <v-btn
+        block
+        size="large"
+        rounded="xl"
+        class="order-btn"
+        :loading="loading"
+        :disabled="loading"
+        @click="$emit('submit')"
+      >
+        <template #prepend>
+          <v-icon>mdi-silverware-fork-knife</v-icon>
+        </template>
+        Place Order · ${{ computedTotal().toFixed(2) }}
+      </v-btn>
+    </div>
 
-        <v-card-actions class="px-4 pb-6">
-          <v-btn variant="text" rounded="pill" @click="noteDialog = false">
-            {{ t('btn.cancel') }}
+    <!-- ── NOTE BOTTOM SHEET ── -->
+    <v-bottom-sheet v-model="noteItemId" :close-on-content-click="false">
+      <v-sheet rounded="t-xl" class="pa-5">
+        <div class="bs-handle mx-auto mb-4" />
+        <div class="bs-title mb-3">Add a note</div>
+        <v-textarea
+          v-model="noteValue"
+          placeholder="e.g. No spicy, less salt, extra sauce..."
+          variant="solo"
+          flat
+          bg-color="rgba(0,0,0,0.04)"
+          rounded="xl"
+          rows="3"
+          hide-details
+          auto-grow
+        />
+        <div class="d-flex gap-3 mt-4">
+          <v-btn
+            variant="tonal"
+            color="grey"
+            rounded="pill"
+            flex="1"
+            class="flex-grow-1"
+            @click="cancelNote"
+          >
+            Cancel
           </v-btn>
+          <v-btn
+            color="#2D7A6E"
+            variant="flat"
+            rounded="pill"
+            class="flex-grow-1"
+            @click="saveNote"
+          >
+            Save Note
+          </v-btn>
+        </div>
+      </v-sheet>
+    </v-bottom-sheet>
 
-          <v-spacer />
-
-          <v-btn color="primary" rounded="pill" @click="saveNote">
-            {{ t('btn.save') }}
+    <!-- ── CLEAR CONFIRM DIALOG ── -->
+    <v-dialog v-model="showClearDialog" max-width="320">
+      <v-card rounded="2xl" class="pa-2">
+        <v-card-title class="text-subtitle-1 font-weight-bold pt-4 px-5">
+          Clear cart?
+        </v-card-title>
+        <v-card-text class="text-body-2 text-medium-emphasis px-5 pt-1">
+          All items will be removed from your cart. This cannot be undone.
+        </v-card-text>
+        <v-card-actions class="px-4 pb-4 gap-2 d-flex">
+          <v-btn
+            variant="tonal"
+            color="grey"
+            rounded="pill"
+            class="flex-grow-1"
+            @click="showClearDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="error"
+            variant="flat"
+            rounded="pill"
+            class="flex-grow-1"
+            @click="confirmClear"
+          >
+            Clear
           </v-btn>
         </v-card-actions>
       </v-card>
-    </v-bottom-sheet>
+    </v-dialog>
+
   </div>
 </template>
 
 <style scoped>
-  .close-bar {
-    width: 40px;
-    height: 5px;
-  }
-  .cart-page-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-    overflow: hidden;
-    background-color: #f8f9fa;
+  .cart-page {
+    background: #FDF8F3;
+    min-height: 100dvh;
+    position: relative;
   }
 
-  .scroll-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-bottom: 150px !important;
-    -webkit-overflow-scrolling: touch;
+  /* ─── HEADER ─── */
+  .cart-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(253, 248, 243, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
   }
 
-  /* Improved Stepper Styling */
-  .stepper-box {
-    display: flex;
-    align-items: center;
-    background: #f5f5f5;
-    padding: 3px;
-    border-radius: 50px;
+  .back-btn {
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,0.07) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+    border-radius: 12px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
-  .qty-display {
-    min-width: 30px;
-    text-align: center;
-    font-weight: 800;
-    font-size: 0.95rem;
-  }
-
-  .line-height-tight {
+  .header-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1C1C1E;
     line-height: 1.2;
   }
 
-  .fixed-footer {
+  .header-sub {
+    font-size: 12px;
+    color: #8E8E93;
+    margin-top: 1px;
+  }
+
+  .clear-btn {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+  }
+
+  /* ─── CONTENT ─── */
+  .cart-content {
+    padding-top: 16px;
+  }
+
+  .pb-36 { padding-bottom: 140px; }
+
+  /* ─── EMPTY STATE ─── */
+  .empty-icon-wrap {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: rgba(45,122,110,0.08);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ─── CART ITEM ─── */
+  .cart-item-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    animation: fadeUp 0.3s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .item-img {
+    border-radius: 14px !important;
+    overflow: hidden;
+  }
+
+  .item-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1C1C1E;
+    line-height: 1.3;
+  }
+
+  .item-price {
+    font-size: 13px;
+    color: #8E8E93;
+    font-weight: 500;
+  }
+
+  .note-preview {
+    cursor: pointer;
+  }
+
+  .note-text {
+    font-size: 11px;
+    color: #8E8E93;
+    font-style: italic;
+    max-width: 130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .add-note {
+    font-size: 12px;
+    color: #2D7A6E;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 2px;
+  }
+
+  /* ─── QTY ─── */
+  .qty-col { min-width: 90px; }
+
+  .subtotal {
+    font-size: 14px;
+    font-weight: 800;
+    color: #2D7A6E;
+    text-align: right;
+  }
+
+  .gap-1 { gap: 4px; }
+  .gap-3 { gap: 12px; }
+
+  .qty-btn {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    border-radius: 9px !important;
+  }
+
+  .qty-num {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1C1C1E;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  /* ─── SUMMARY ─── */
+  .summary-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+
+  .summary-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1C1C1E;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .summary-label { font-size: 13px; color: #8E8E93; }
+  .summary-value { font-size: 13px; font-weight: 600; color: #1C1C1E; }
+
+  .total-row {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1C1C1E;
+    margin-bottom: 0;
+  }
+
+  .total-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: #2D7A6E;
+  }
+
+  /* ─── ORDER BAR ─── */
+  .order-bar {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    z-index: 1000;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 16px) !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 420px;
+    background: rgba(253, 248, 243, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(0,0,0,0.06);
+    z-index: 100;
   }
 
-  .shadow-top {
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05) !important;
+  .order-btn {
+    background: #1C1C1E !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    height: 54px !important;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18) !important;
   }
 
-  .checkout-btn {
-    transition: transform 0.1s;
+  /* ─── BOTTOM SHEET ─── */
+  .bs-handle {
+    width: 36px; height: 4px;
+    border-radius: 100px;
+    background: rgba(0,0,0,0.12);
   }
 
-  .checkout-btn:active {
-    transform: scale(0.97);
+  .bs-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1C1C1E;
   }
 
-  .cart-card {
-    background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  /* ─── TRANSITION ─── */
+  .cart-item-enter-active,
+  .cart-item-leave-active {
+    transition: all 0.3s ease;
   }
 
-  .action-btn {
-    background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-    border-radius: 12px !important;
+  .cart-item-enter-from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  .cart-item-leave-to {
+    opacity: 0;
+    transform: translateX(16px);
+    max-height: 0;
   }
 </style>

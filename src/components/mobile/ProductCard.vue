@@ -193,7 +193,7 @@
   </v-snackbar>
 
   <!-- Product Grid -->
-  <v-row class="pa-2">
+  <v-row class="pa-0">
     <transition-group
       name="card-pop"
       appear

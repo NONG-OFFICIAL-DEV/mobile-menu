@@ -12,7 +12,7 @@
   const route = useRoute()
   const token = route.params.token
   const tableNumber = Number(localStorage.getItem('tableNumber'))
-  
+
   const orderStore = useOrderStore()
   const menuStore = useMenuStore()
 
@@ -22,7 +22,6 @@
 
   async function placeOrder() {
     isOrdering.value = true
-
     try {
       const orderData = {
         table_id: tableNumber,
@@ -31,13 +30,11 @@
           quantity: i.qty,
           price: i.price,
           note: i.note || null,
-          customizations: i.customizations || null
-        }))
+          customizations: i.customizations || null,
+        })),
       }
-
       await orderStore.createOrder(orderData, 'noLoading')
       await menuStore.fetchMenus()
-
       router.replace({ name: 'menu.success', params: { token } })
     } catch (err) {
       console.error(err)
@@ -45,6 +42,7 @@
       isOrdering.value = false
     }
   }
+
   function handleUpdateNote(itemId, note) {
     const item = cart.value.find(i => i.id === itemId)
     if (item) item.note = note
@@ -56,7 +54,7 @@
 </script>
 
 <template>
-  <div>
+  <div class="page-bg">
     <CartView
       :cart="cart"
       :total="cartTotal"
@@ -70,3 +68,10 @@
     />
   </div>
 </template>
+
+<style scoped>
+.page-bg {
+  background: #FDF8F3;
+  min-height: 100dvh;
+}
+</style>

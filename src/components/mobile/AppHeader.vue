@@ -1,86 +1,85 @@
 <script setup>
   import LanguageBottomSheet from '../customs/LanguageBottomSheet.vue'
   import { useI18n } from 'vue-i18n'
-  const { t } = useI18n()
   import { useCart } from '@/composables/useCart'
 
+  const { t } = useI18n()
   const { totalItems } = useCart()
 
   defineProps({
     tableNumber: Number,
     search: String,
-    isOrder: Object
+    isOrder: Object,
   })
+
   defineEmits(['view-process', 'view-cart', 'view-history', 'update:search'])
 </script>
 
 <template>
-  <div class="header-container sticky-header">
-    <div class="d-flex align-center justify-space-between px-4 py-2">
-      <div class="d-flex align-center">
-        <!-- <div class="table-pill d-flex align-center px-3 py-1 mr-2">
-          <v-icon size="16" color="#3b828e" class="mr-2">
-            mdi-table-furniture
-          </v-icon>
-          <span class="text-subtitle-2 font-weight-black color-primary">
-            {{ tableNumber }}
-          </span>
-        </div> -->
-        <v-avatar>
+  <div class="app-header">
+    <div class="header-inner px-4 py-2">
+
+      <!-- LEFT: Brand -->
+      <div class="brand d-flex align-center gap-3">
+        <v-avatar size="40" rounded="lg" class="brand-avatar">
           <v-img
-            alt="John"
             src="https://i.pinimg.com/736x/24/35/1f/24351fd9348c232ffb57e24fc809d5a2.jpg"
-          ></v-img>
+            cover
+            alt="Restaurant logo"
+          />
         </v-avatar>
-        <h1 class="text-subtitle-2 font-weight-bold">Siem Reap Kitchen</h1>
+        <div>
+          <div class="brand-name">Siem Reap Kitchen</div>
+          <div class="brand-sub d-flex align-center gap-1">
+            <v-icon size="10" color="success">mdi-circle</v-icon>
+            <span>Open · Table {{ tableNumber ?? '–' }}</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Right: Actions -->
-      <div class="d-flex align-center ga-2">
-        <!-- Cart -->
+      <!-- RIGHT: Actions -->
+      <div class="actions d-flex align-center gap-2">
+
+        <!-- Cart icon (only when items exist) -->
         <v-btn
           v-if="totalItems"
-          class="action-btn"
           icon
           variant="flat"
           size="small"
+          class="action-icon-btn"
           @click="$emit('view-cart')"
         >
           <v-badge
             :content="totalItems"
-            :model-value="totalItems > 0"
-            color="primary"
-            location="top end"
+            color="#E8A84A"
+            floating
           >
-            <v-icon icon="mdi-cart-outline" color="primary" size="22" />
+            <v-icon size="20" color="#2D7A6E">mdi-cart-outline</v-icon>
           </v-badge>
         </v-btn>
 
-        <!-- Tracking -->
-        <!-- <v-btn
-          class="action-btn"
-          icon
-          size="small"
-          variant="flat"
-          @click="$emit('view-process')"
-        >
-          <v-icon icon="mdi-room-service-outline" color="primary" size="22" />
-        </v-btn> -->
+        <!-- Order history (only when there is an order) -->
         <v-btn
-          v-if="isOrder.items?.length > 0"
-          class="action-btn"
+          v-if="isOrder?.items?.length > 0"
           icon
-          size="small"
           variant="flat"
+          size="small"
+          class="action-icon-btn"
           @click="$emit('view-history')"
         >
-          <v-icon icon="mdi-receipt-clock-outline" color="primary" size="22" />
+          <v-icon size="20" color="#2D7A6E">mdi-receipt-clock-outline</v-icon>
         </v-btn>
-        <LanguageBottomSheet :stackedBtn="false" :iconBtn="true" />
+
+        <!-- Language switcher -->
+        <div class="action-icon-btn d-flex align-center justify-center">
+          <LanguageBottomSheet :stackedBtn="false" :iconBtn="true" />
+        </div>
+
       </div>
     </div>
 
-    <div v-if="search !== undefined" class="px-4 pb-3">
+    <!-- SEARCH (only when prop is passed) -->
+    <div v-if="search !== undefined" class="search-area px-4 pb-3">
       <v-text-field
         :model-value="search"
         @update:model-value="$emit('update:search', $event)"
@@ -89,15 +88,23 @@
         density="compact"
         hide-details
         flat
-        bg-color="#f5f5f5"
+        bg-color="rgba(0,0,0,0.05)"
         prepend-inner-icon="mdi-magnify"
         rounded="xl"
-        class="search-input"
+        class="search-field"
       >
-        <template v-slot:append-inner v-if="search">
-          <v-icon size="18" color="grey" @click="$emit('update:search', '')">
-            mdi-close-circle
-          </v-icon>
+        <template #append-inner>
+          <v-fade-transition>
+            <v-icon
+              v-if="search"
+              size="16"
+              color="grey"
+              style="cursor:pointer"
+              @click="$emit('update:search', '')"
+            >
+              mdi-close-circle
+            </v-icon>
+          </v-fade-transition>
         </template>
       </v-text-field>
     </div>
@@ -105,91 +112,82 @@
 </template>
 
 <style scoped>
-  .header-container {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px); /* Modern blur effect */
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  }
-
-  .sticky-header {
+  .app-header {
     position: sticky;
     top: 0;
     z-index: 100;
+    background: rgba(253, 248, 243, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   }
 
-  .table-pill {
-    background: #3b828e15;
-    border: 1px solid #3b828e30;
-    border-radius: 100px;
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .color-primary {
-    color: #3b828e;
+  /* Brand */
+  .brand-avatar {
+    border: 2px solid #2D7A6E !important;
+    flex-shrink: 0;
   }
 
-  .order-btn {
-    letter-spacing: 0.5px;
-    background-color: #3b828e !important;
-    color: white !important;
+  .brand-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1C1C1E;
+    line-height: 1.2;
   }
 
-  /* Make search feel like a native mobile input */
-  :deep(.search-input .v-field) {
+  .brand-sub {
+    font-size: 11px;
+    color: #8E8E93;
+    font-weight: 400;
+    margin-top: 1px;
+  }
+
+  /* Action buttons */
+  .action-icon-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
     border-radius: 12px !important;
-    font-size: 14px;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(0, 0, 0, 0.07) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+    transition: transform 0.15s;
   }
 
-  :deep(.search-input .v-field__input) {
-    min-height: 40px !important;
+  .action-icon-btn:active {
+    transform: scale(0.9);
+  }
+
+  /* Gap utility (for older Vuetify that might not support gap on d-flex) */
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .gap-1 { gap: 4px; }
+
+  /* Search */
+  .search-area {
+    margin-top: 6px;
+  }
+
+  :deep(.search-field .v-field) {
+    border-radius: 14px !important;
+    font-size: 14px;
+    background: rgba(0,0,0,0.05) !important;
+  }
+
+  :deep(.search-field .v-field--focused) {
+    background: #fff !important;
+    outline: 1.5px solid #2D7A6E;
+  }
+
+  :deep(.search-field .v-field__input) {
+    min-height: 42px !important;
     padding-top: 0;
     padding-bottom: 0;
-  }
-  /* Modern glass header */
-  .header {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  }
-
-  .sticky-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  /* Table pill */
-  .table-pill {
-    background: #3b828e12;
-    border: 1px solid #3b828e30;
-    border-radius: 999px;
-  }
-
-  .color-primary {
-    color: #3b828e;
-  }
-
-  /* Modern action button */
-  .action-btn {
-    border-radius: 14px;
-    background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  }
-
-  /* Search styling */
-  :deep(.search-input .v-field) {
-    border-radius: 16px !important;
-    font-size: 14px;
-  }
-
-  :deep(.search-input .v-field__input) {
-    min-height: 44px !important;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  .cursor-pointer {
-    cursor: pointer;
   }
 </style>
