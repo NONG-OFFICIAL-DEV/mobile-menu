@@ -3,6 +3,7 @@
     "filter": "Filter",
     "reFilter": "Clear Search",
     "done": "Done",
+    "yes": "Yes",
     "save": "Save",
     "cancel": "Cancel",
     "edit": "Edit",
@@ -41,7 +42,10 @@
     "addNote": "Add note",
     "editNote": "Edit note",
     "noteFor": "Note for",
-    "notePlaceholder": "Example: No spicy, no sugar, extra sauce..."
+    "notePlaceholder": "Example: No spicy, no sugar, extra sauce...",
+    "tryOrderWord": "Try a different category or keyword",
+    "dishes": "Dishes",
+    "allDishes": "All Dishes"
   },
   "lang": {
     "km": "Khmer",
@@ -68,5 +72,17 @@
   "header": {
     "orderTitle": "My Orders",
     "orderHistory": "Order History"
+  },
+  "banner": {
+    "todaySpecial": "Today's Special",
+    "orderByPhone": "Order dishes and drinks using your phone",
+    "newDishes": "New Dishes"
+  },
+  "quickNotes": {
+    "noSpicy": "No spicy 🌶️",
+    "lessSalt": "Less salt",
+    "extraSauce": "Extra sauce",
+    "noOnion": "No onion",
+    "wellDone": "Well done"
   }
 }

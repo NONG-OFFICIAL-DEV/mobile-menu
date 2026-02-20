@@ -1,12 +1,16 @@
 <script setup>
   import { onMounted, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
 
+  const { t } = useI18n()
   defineEmits(['back', 'reset', 'view-history'])
 
   // Animate checkmark on mount
   const visible = ref(false)
   onMounted(() => {
-    setTimeout(() => { visible.value = true }, 80)
+    setTimeout(() => {
+      visible.value = true
+    }, 80)
   })
 
   // Fun order number
@@ -15,7 +19,6 @@
 
 <template>
   <div class="success-page d-flex flex-column align-center">
-
     <!-- ── CONFETTI DOTS ── -->
     <div class="confetti-wrap" aria-hidden="true">
       <span v-for="n in 18" :key="n" class="dot" :class="`dot-${n}`" />
@@ -23,7 +26,6 @@
 
     <!-- ── MAIN CONTENT ── -->
     <div class="content d-flex flex-column align-center px-6 text-center">
-
       <!-- Check circle -->
       <div class="check-ring" :class="{ show: visible }">
         <div class="check-inner">
@@ -35,45 +37,14 @@
       </div>
 
       <!-- Text -->
-      <h1 class="success-title mt-6">Order Placed!</h1>
-      <p class="success-sub mt-2">
-        Your dishes are on their way to the kitchen.<br>
-        Sit back and relax 🍽️
+      <h1 class="text-h5 font-weight-bold mb-2">
+        {{ t('message.confirmed') }}
+      </h1>
+      <p class="text-body-1 text-medium-emphasis mb-6">
+        {{ t('message.wating') }}
+        <br />
+        {{ t('message.ready') }}
       </p>
-
-      <!-- Order tag -->
-      <div class="order-tag mt-5 d-flex align-center gap-2">
-        <v-icon size="15" color="#2D7A6E">mdi-receipt-outline</v-icon>
-        <span>Order <strong>#{{ orderNum }}</strong> confirmed</span>
-      </div>
-
-      <!-- Steps -->
-      <div class="steps-card mt-6 w-100">
-        <div class="step d-flex align-center gap-3">
-          <div class="step-dot active" />
-          <div class="step-info">
-            <div class="step-title">Order received</div>
-            <div class="step-sub">Just now</div>
-          </div>
-          <v-icon size="16" color="#2D7A6E" class="ml-auto">mdi-check-circle</v-icon>
-        </div>
-        <div class="step-line" />
-        <div class="step d-flex align-center gap-3">
-          <div class="step-dot pulse" />
-          <div class="step-info">
-            <div class="step-title">Kitchen preparing</div>
-            <div class="step-sub">Estimated 15–20 min</div>
-          </div>
-        </div>
-        <div class="step-line" />
-        <div class="step d-flex align-center gap-3">
-          <div class="step-dot inactive" />
-          <div class="step-info">
-            <div class="step-title">Ready to serve</div>
-            <div class="step-sub">We'll bring it to your table</div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ── ACTIONS ── -->
@@ -86,7 +57,7 @@
         prepend-icon="mdi-history"
         @click="$emit('view-history')"
       >
-        Track My Order
+        {{ t('btn.viewHistory') }}
       </v-btn>
 
       <v-btn
@@ -98,17 +69,16 @@
         prepend-icon="mdi-silverware-fork-knife"
         @click="$emit('reset')"
       >
-        Order More
+        {{ t('btn.orderMore') }}
       </v-btn>
     </div>
-
   </div>
 </template>
 
 <style scoped>
   /* ─── PAGE ─── */
   .success-page {
-    background: #FDF8F3;
+    background: #fdf8f3;
     min-height: 100dvh;
     position: relative;
     overflow: hidden;
@@ -116,8 +86,6 @@
   }
 
   .content {
-    flex: 1;
-    width: 100%;
     max-width: 420px;
     z-index: 1;
   }
@@ -137,30 +105,166 @@
   }
 
   /* sizes & colors */
-  .dot-1  { width:10px; height:10px; background:#2D7A6E; top:4%;  left:10%;  animation-delay:.1s; }
-  .dot-2  { width:7px;  height:7px;  background:#E8A84A; top:6%;  left:25%;  animation-delay:.3s; }
-  .dot-3  { width:12px; height:12px; background:#3b9285; top:3%;  left:42%;  animation-delay:.05s;}
-  .dot-4  { width:8px;  height:8px;  background:#E8A84A; top:8%;  left:60%;  animation-delay:.25s;}
-  .dot-5  { width:6px;  height:6px;  background:#2D7A6E; top:4%;  left:78%;  animation-delay:.15s;}
-  .dot-6  { width:10px; height:10px; background:#E8A84A; top:12%; left:88%;  animation-delay:.4s; }
-  .dot-7  { width:7px;  height:7px;  background:#3b9285; top:16%; left:5%;   animation-delay:.2s; }
-  .dot-8  { width:9px;  height:9px;  background:#2D7A6E; top:2%;  left:55%;  animation-delay:.35s;}
-  .dot-9  { width:6px;  height:6px;  background:#E8A84A; top:10%; left:35%;  animation-delay:.45s;}
-  .dot-10 { width:11px; height:11px; background:#2D7A6E; top:18%; left:70%;  animation-delay:.1s; }
-  .dot-11 { width:8px;  height:8px;  background:#3b9285; top:5%;  left:90%;  animation-delay:.55s;}
-  .dot-12 { width:7px;  height:7px;  background:#E8A84A; top:14%; left:18%;  animation-delay:.3s; }
-  .dot-13 { width:10px; height:10px; background:#2D7A6E; top:20%; left:48%;  animation-delay:.15s;}
-  .dot-14 { width:6px;  height:6px;  background:#E8A84A; top:8%;  left:82%;  animation-delay:.5s; }
-  .dot-15 { width:9px;  height:9px;  background:#3b9285; top:1%;  left:68%;  animation-delay:.2s; }
-  .dot-16 { width:7px;  height:7px;  background:#2D7A6E; top:16%; left:30%;  animation-delay:.4s; }
-  .dot-17 { width:8px;  height:8px;  background:#E8A84A; top:22%; left:58%;  animation-delay:.25s;}
-  .dot-18 { width:6px;  height:6px;  background:#3b9285; top:12%; left:94%;  animation-delay:.6s; }
+  .dot-1 {
+    width: 10px;
+    height: 10px;
+    background: #2d7a6e;
+    top: 4%;
+    left: 10%;
+    animation-delay: 0.1s;
+  }
+  .dot-2 {
+    width: 7px;
+    height: 7px;
+    background: #e8a84a;
+    top: 6%;
+    left: 25%;
+    animation-delay: 0.3s;
+  }
+  .dot-3 {
+    width: 12px;
+    height: 12px;
+    background: #3b9285;
+    top: 3%;
+    left: 42%;
+    animation-delay: 0.05s;
+  }
+  .dot-4 {
+    width: 8px;
+    height: 8px;
+    background: #e8a84a;
+    top: 8%;
+    left: 60%;
+    animation-delay: 0.25s;
+  }
+  .dot-5 {
+    width: 6px;
+    height: 6px;
+    background: #2d7a6e;
+    top: 4%;
+    left: 78%;
+    animation-delay: 0.15s;
+  }
+  .dot-6 {
+    width: 10px;
+    height: 10px;
+    background: #e8a84a;
+    top: 12%;
+    left: 88%;
+    animation-delay: 0.4s;
+  }
+  .dot-7 {
+    width: 7px;
+    height: 7px;
+    background: #3b9285;
+    top: 16%;
+    left: 5%;
+    animation-delay: 0.2s;
+  }
+  .dot-8 {
+    width: 9px;
+    height: 9px;
+    background: #2d7a6e;
+    top: 2%;
+    left: 55%;
+    animation-delay: 0.35s;
+  }
+  .dot-9 {
+    width: 6px;
+    height: 6px;
+    background: #e8a84a;
+    top: 10%;
+    left: 35%;
+    animation-delay: 0.45s;
+  }
+  .dot-10 {
+    width: 11px;
+    height: 11px;
+    background: #2d7a6e;
+    top: 18%;
+    left: 70%;
+    animation-delay: 0.1s;
+  }
+  .dot-11 {
+    width: 8px;
+    height: 8px;
+    background: #3b9285;
+    top: 5%;
+    left: 90%;
+    animation-delay: 0.55s;
+  }
+  .dot-12 {
+    width: 7px;
+    height: 7px;
+    background: #e8a84a;
+    top: 14%;
+    left: 18%;
+    animation-delay: 0.3s;
+  }
+  .dot-13 {
+    width: 10px;
+    height: 10px;
+    background: #2d7a6e;
+    top: 20%;
+    left: 48%;
+    animation-delay: 0.15s;
+  }
+  .dot-14 {
+    width: 6px;
+    height: 6px;
+    background: #e8a84a;
+    top: 8%;
+    left: 82%;
+    animation-delay: 0.5s;
+  }
+  .dot-15 {
+    width: 9px;
+    height: 9px;
+    background: #3b9285;
+    top: 1%;
+    left: 68%;
+    animation-delay: 0.2s;
+  }
+  .dot-16 {
+    width: 7px;
+    height: 7px;
+    background: #2d7a6e;
+    top: 16%;
+    left: 30%;
+    animation-delay: 0.4s;
+  }
+  .dot-17 {
+    width: 8px;
+    height: 8px;
+    background: #e8a84a;
+    top: 22%;
+    left: 58%;
+    animation-delay: 0.25s;
+  }
+  .dot-18 {
+    width: 6px;
+    height: 6px;
+    background: #3b9285;
+    top: 12%;
+    left: 94%;
+    animation-delay: 0.6s;
+  }
 
   @keyframes confettiFall {
-    0%   { opacity: 0; transform: translateY(-20px) rotate(0deg); }
-    20%  { opacity: 1; }
-    80%  { opacity: 0.6; }
-    100% { opacity: 0; transform: translateY(60px) rotate(180deg); }
+    0% {
+      opacity: 0;
+      transform: translateY(-20px) rotate(0deg);
+    }
+    20% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 0.6;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(60px) rotate(180deg);
+    }
   }
 
   /* ─── CHECK RING ─── */
@@ -174,7 +278,9 @@
     justify-content: center;
     transform: scale(0.4);
     opacity: 0;
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+    transition:
+      transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.4s ease;
   }
 
   .check-ring.show {
@@ -186,7 +292,7 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: #2D7A6E;
+    background: #2d7a6e;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -215,20 +321,22 @@
   }
 
   @keyframes drawTick {
-    to { stroke-dashoffset: 0; }
+    to {
+      stroke-dashoffset: 0;
+    }
   }
 
   /* ─── TEXT ─── */
   .success-title {
     font-size: 26px;
     font-weight: 800;
-    color: #1C1C1E;
+    color: #1c1c1e;
     letter-spacing: -0.5px;
   }
 
   .success-sub {
     font-size: 14px;
-    color: #8E8E93;
+    color: #8e8e93;
     line-height: 1.6;
   }
 
@@ -239,17 +347,19 @@
     border-radius: 100px;
     padding: 7px 16px;
     font-size: 13px;
-    color: #2D7A6E;
+    color: #2d7a6e;
   }
 
-  .gap-2 { gap: 8px; }
+  .gap-2 {
+    gap: 8px;
+  }
 
   /* ─── STEPS ─── */
   .steps-card {
     background: #ffffff;
     border-radius: 20px;
     padding: 18px 20px;
-    box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.05);
     text-align: left;
   }
 
@@ -257,7 +367,9 @@
     position: relative;
   }
 
-  .gap-3 { gap: 12px; }
+  .gap-3 {
+    gap: 12px;
+  }
 
   .step-dot {
     width: 12px;
@@ -266,37 +378,47 @@
     flex-shrink: 0;
   }
 
-  .step-dot.active   { background: #2D7A6E; }
-  .step-dot.inactive { background: #E0E0E0; }
+  .step-dot.active {
+    background: #2d7a6e;
+  }
+  .step-dot.inactive {
+    background: #e0e0e0;
+  }
 
   .step-dot.pulse {
-    background: #E8A84A;
-    box-shadow: 0 0 0 0 rgba(232,168,74,0.5);
+    background: #e8a84a;
+    box-shadow: 0 0 0 0 rgba(232, 168, 74, 0.5);
     animation: pulseRing 1.5s ease-out infinite;
   }
 
   @keyframes pulseRing {
-    0%   { box-shadow: 0 0 0 0 rgba(232,168,74,0.5); }
-    70%  { box-shadow: 0 0 0 8px rgba(232,168,74,0); }
-    100% { box-shadow: 0 0 0 0 rgba(232,168,74,0); }
+    0% {
+      box-shadow: 0 0 0 0 rgba(232, 168, 74, 0.5);
+    }
+    70% {
+      box-shadow: 0 0 0 8px rgba(232, 168, 74, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(232, 168, 74, 0);
+    }
   }
 
   .step-line {
     width: 2px;
     height: 22px;
-    background: #F0F0F0;
+    background: #f0f0f0;
     margin: 4px 0 4px 5px;
   }
 
   .step-title {
     font-size: 13px;
     font-weight: 600;
-    color: #1C1C1E;
+    color: #1c1c1e;
   }
 
   .step-sub {
     font-size: 11px;
-    color: #8E8E93;
+    color: #8e8e93;
     margin-top: 1px;
   }
 
@@ -307,15 +429,17 @@
     margin-top: 28px;
   }
 
-  .gap-3 { gap: 12px; }
+  .gap-3 {
+    gap: 12px;
+  }
 
   .primary-btn {
-    background: #1C1C1E !important;
+    background: #1c1c1e !important;
     color: #ffffff !important;
     font-size: 15px !important;
     font-weight: 700 !important;
     letter-spacing: 0 !important;
     height: 54px !important;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.16) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16) !important;
   }
 </style>

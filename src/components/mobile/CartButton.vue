@@ -1,103 +1,51 @@
 <script setup>
-  defineProps({
-    totalItems: {
-      type: Number,
-      default: 0,
-    },
-    totalPrice: {
-      type: [Number, String],
-      default: 0,
-    },
-  })
+  import { useCurrency } from '@/composables/useCurrency.js'
+  const { formatCurrency } = useCurrency()
+  import { useI18n } from 'vue-i18n'
 
+  const { t } = useI18n()
+  defineProps({
+    totalItems: Number,
+    totalPrice: Number
+  })
   defineEmits(['open'])
 </script>
 
 <template>
-  <div class="cart-float-wrap" @click="$emit('open')">
-    <v-card flat class="cart-float-card d-flex align-center px-4 py-3">
-
-      <!-- Item count badge -->
-      <div class="cart-count-badge mr-3 d-flex align-center justify-center">
-        <span>{{ totalItems }}</span>
-      </div>
-
-      <!-- Label -->
-      <div class="flex-grow-1">
-        <div class="cart-label">View Cart</div>
-        <div class="cart-sub">Tap to review your order</div>
-      </div>
-
-      <!-- Price + Arrow -->
-      <div class="d-flex align-center gap-1">
-        <span class="cart-price">${{ Number(totalPrice).toFixed(2) }}</span>
-        <v-icon size="18" color="#E8A84A">mdi-chevron-right</v-icon>
-      </div>
-
-    </v-card>
+  <div class="cart-anchor px-4">
+    <v-btn
+      block
+      size="large"
+      color="primary"
+      rounded="pill"
+      class="shadow-top"
+      elevation="8"
+      @click="$emit('open')"
+      append-icon="mdi-chevron-right"
+    >
+      <v-avatar color="white" size="28" class="mr-3">
+        <span class="text-caption font-weight-bold">
+          {{ totalItems }}
+        </span>
+      </v-avatar>
+      {{t('btn.yourOrder')}}
+      <v-spacer />
+      <span class="ms-4">
+        {{ formatCurrency(totalPrice) }}
+      </span>
+    </v-btn>
   </div>
 </template>
 
 <style scoped>
-  .cart-float-wrap {
+  .cart-anchor {
     position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 420px;
-    z-index: 200;
-    cursor: pointer;
+    bottom: 24px; /* Native feel */
+    left: 0;
+    right: 0;
+    z-index: 999;
   }
-
-  .cart-float-card {
-    background: #1C1C1E !important;
-    border-radius: 20px !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.22) !important;
-    min-height: 62px;
-    transition: transform 0.15s;
+  .shadow-top {
+    box-shadow: 0 10px 30px rgba(59, 130, 142, 0.4) !important;
   }
-
-  .cart-float-wrap:active .cart-float-card {
-    transform: scale(0.97);
-  }
-
-  /* Badge */
-  .cart-count-badge {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    background: #2D7A6E;
-    flex-shrink: 0;
-  }
-
-  .cart-count-badge span {
-    font-size: 13px;
-    font-weight: 700;
-    color: #ffffff;
-  }
-
-  /* Text */
-  .cart-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #ffffff;
-    line-height: 1.2;
-  }
-
-  .cart-sub {
-    font-size: 11px;
-    color: rgba(255,255,255,0.5);
-    margin-top: 1px;
-  }
-
-  /* Price */
-  .cart-price {
-    font-size: 15px;
-    font-weight: 800;
-    color: #E8A84A;
-    letter-spacing: -0.3px;
-  }
-
-  .gap-1 { gap: 4px; }
 </style>

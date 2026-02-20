@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mobile-menu-frontend
+    container_name: mobile-menu-frontend-beta
     image: nongdev/mobile-menu-frontend:latest
     restart: always
     networks:
