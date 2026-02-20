@@ -67,7 +67,8 @@
     "thank": "Thank you for your order!",
     "confirmed": "Order Confirmed!",
     "wating": "Your order has been sent to the kitchen.",
-    "ready": "We'll notify you when it's ready."
+    "ready": "We'll notify you when it's ready.",
+    "clear": "Cart cleared"
   },
   "header": {
     "orderTitle": "My Orders",
@@ -82,7 +83,6 @@
     "noSpicy": "No spicy 🌶️",
     "lessSalt": "Less salt",
     "extraSauce": "Extra sauce",
-    "noOnion": "No onion",
-    "wellDone": "Well done"
+    "noOnion": "No onion"
   }
 }

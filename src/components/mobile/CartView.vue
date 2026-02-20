@@ -54,6 +54,10 @@
     noteDialog.value = false
   }
 
+   function cancelNote() {
+    noteDialog.value = false
+  }
+
   function confirmClear() {
     confirm({
       title: 'Delete this item?',
@@ -65,7 +69,7 @@
       },
       agree: async () => {
         emit('clear')
-        notif(t('messages.deleted_success'), {
+        notif(t('message.clear'), {
           type: 'success',
           color: 'primary'
         })
