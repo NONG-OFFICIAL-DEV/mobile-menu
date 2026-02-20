@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ beta ]
   workflow_dispatch:
 
 # =========================
@@ -12,7 +12,7 @@ jobs:
   build-push:
     runs-on: ubuntu-latest
     env:
-      IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/mobile-menu-frontend
+      IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/mobile-menu-frontend-beta
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Checkout code
