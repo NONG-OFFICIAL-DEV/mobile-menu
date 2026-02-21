@@ -84,7 +84,8 @@
     <!-- HEADER -->
     <AppHeader
       v-if="$route.name === 'menu.home'"
-      :isOrder="order"
+      :isOrder="order || {}"
+      :tableNumber="tableNumber"
       @view-process="goToTracking"
       @view-history="viewHistory"
       @view-cart="goToCart"

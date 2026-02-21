@@ -11,7 +11,7 @@
   const router = useRouter()
   const route = useRoute()
   const token = route.params.token
-  const tableNumber = Number(localStorage.getItem('tableNumber'))
+  const tableNumber = Number(localStorage.getItem('tableId'))
 
   const orderStore = useOrderStore()
   const menuStore = useMenuStore()
