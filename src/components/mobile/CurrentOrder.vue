@@ -5,18 +5,17 @@
   import { useDiningTableStore } from '../../stores/diningTableStore'
   import { useI18n } from 'vue-i18n'
   import { useRoute } from 'vue-router'
-  import { useDate } from '@/composables/useDate'
+  import { formatDateText } from '@nong-official-dev/core'
+
   import { useLoadingStore } from '@/stores/loadingStore'
-  import { useCurrency } from '@/composables/useCurrency.js'
 
   const loadingStore = useLoadingStore()
-  const { formatCurrency } = useCurrency()
+  import { formatCurrency } from '@nong-official-dev/core'
 
   defineEmits(['close'])
   const { t } = useI18n()
   const orderStore = useOrderStore()
   const diningTableStore = useDiningTableStore()
-  const { formatDateText } = useDate()
   const route = useRoute()
   const token = route.params.token
   const order = ref({})

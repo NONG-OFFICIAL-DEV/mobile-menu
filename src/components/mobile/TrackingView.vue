@@ -144,12 +144,11 @@
   import { useRoute } from 'vue-router'
   import { useDiningTableStore } from '../../stores/diningTableStore'
   import { useOrderStream } from '@/stores/useOrderStream'
-  import { useCurrency } from '@/composables/useCurrency.js'
   import CustomAppHeader from './CustomAppHeader.vue'
   import { useI18n } from 'vue-i18n'
 
   const { t } = useI18n()
-  const { formatCurrency } = useCurrency()
+  import { formatCurrency } from '@nong-official-dev/core'
   const diningTableStore = useDiningTableStore()
   const route = useRoute()
   const token = route.params.token

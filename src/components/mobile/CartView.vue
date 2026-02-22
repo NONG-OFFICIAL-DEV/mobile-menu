@@ -1,6 +1,5 @@
 <script setup>
   import { computed, ref } from 'vue'
-  import { useCurrency } from '@/composables/useCurrency.js'
   import CustomAppHeader from './CustomAppHeader.vue'
   import { useI18n } from 'vue-i18n'
   import { useAppUtils } from '@/composables/useAppUtils'
@@ -8,7 +7,7 @@
 
   const { t, tm } = useI18n()
   import QtyStepper from '../customs/QtyStepper.vue'
-  const { formatCurrency } = useCurrency()
+  import { formatCurrency } from '@nong-official-dev/core'
 
   const prop = defineProps({
     cart: {
@@ -54,7 +53,7 @@
     noteDialog.value = false
   }
 
-   function cancelNote() {
+  function cancelNote() {
     noteDialog.value = false
   }
 

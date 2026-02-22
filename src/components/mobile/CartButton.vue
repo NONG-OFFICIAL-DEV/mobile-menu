@@ -1,6 +1,5 @@
 <script setup>
-  import { useCurrency } from '@/composables/useCurrency.js'
-  const { formatCurrency } = useCurrency()
+  import { formatCurrency } from '@nong-official-dev/core'
   import { useI18n } from 'vue-i18n'
 
   const { t } = useI18n()

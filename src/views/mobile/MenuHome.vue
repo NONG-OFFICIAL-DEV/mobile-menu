@@ -232,12 +232,6 @@
     min-width: 100px;
     width: 100px;
   }
-  /* ─── PAGE BG ─── */
-  .page-bg {
-    background: #fdf8f3;
-    min-height: 100dvh;
-  }
-
   /* ─── STICKY NAV ─── */
   .sticky-nav {
     position: sticky;
