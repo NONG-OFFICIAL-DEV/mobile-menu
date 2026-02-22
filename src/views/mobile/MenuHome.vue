@@ -116,13 +116,13 @@
           <p
             class="hero-label text-caption font-weight-bold mb-1 text-uppercase"
           >
-            🔥 {{t('banner.todaySpecial')}}
+            🔥 {{ t('banner.todaySpecial') }}
           </p>
           <h2 class="hero-title font-weight-black">
-            {{t('banner.orderByPhone')}}
+            {{ t('banner.orderByPhone') }}
           </h2>
           <p class="hero-sub text-caption mt-1">
-            {{t('banner.newDishes')}}
+            {{ t('banner.newDishes') }}
           </p>
         </div>
         <v-spacer />
@@ -141,9 +141,9 @@
     <!-- CONTENT -->
     <v-container class="pb-16 pt-3" fluid>
       <div class="d-flex align-center justify-space-between px-1 mb-3">
-        <span class="section-title">{{t('common.allDishes')}}</span>
+        <span class="section-title">{{ t('common.allDishes') }}</span>
         <span class="section-count text-caption">
-          {{ filteredProducts.length }} {{t('common.dishes')}}
+          {{ filteredProducts.length }} {{ t('common.dishes') }}
         </span>
       </div>
 
@@ -326,13 +326,23 @@
 
   /* ─── CART BUTTON TRANSITION ─── */
   .cart-pop-enter-active {
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .cart-pop-leave-active {
-    transition: all 0.25s ease;
+    animation: pop-in 0.2s reverse;
   }
 
+  @keyframes pop-in {
+    0% {
+      transform: scale(0.5) translateY(100px);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
   /* bottom padding so last card not hidden by cart button */
   .pb-16 {
     padding-bottom: 112px !important;
