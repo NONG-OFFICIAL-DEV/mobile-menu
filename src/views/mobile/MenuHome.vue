@@ -325,7 +325,7 @@
   }
 
   /* ─── CART BUTTON TRANSITION ─── */
-  /* .cart-pop-enter-active {
+  .cart-pop-enter-active {
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
@@ -337,7 +337,7 @@
   .cart-pop-leave-to {
     transform: translateY(80px);
     opacity: 0;
-  } */
+  }
 
   /* bottom padding so last card not hidden by cart button */
   .pb-16 {
