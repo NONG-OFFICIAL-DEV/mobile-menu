@@ -14,8 +14,19 @@ ENV VITE_APP_I18N_LOCALE=$VITE_APP_I18N_LOCALE
 ENV VITE_APP_I18N_FALLBACK_LOCALE=$VITE_APP_I18N_FALLBACK_LOCALE
 ENV VITE_APP_API_BASE_AI_URL=$VITE_APP_API_BASE_AI_URL
 
+# Receive token as build arg
+ARG GITHUB_TOKEN
+
+# Setup registry auth
+RUN echo "@nong-official-dev:registry=https://npm.pkg.github.com" > .npmrc && \
+    echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
+    
 COPY package*.json ./
 RUN npm install
+
+# Remove token after install
+RUN rm -f .npmrc
+
 COPY . .
 RUN npm run build
 
