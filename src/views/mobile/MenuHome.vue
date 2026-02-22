@@ -333,12 +333,6 @@
     transition: all 0.25s ease;
   }
 
-  .cart-pop-enter-from,
-  .cart-pop-leave-to {
-    transform: translateY(80px);
-    opacity: 0;
-  }
-
   /* bottom padding so last card not hidden by cart button */
   .pb-16 {
     padding-bottom: 112px !important;
