@@ -139,7 +139,7 @@
     </div>
 
     <!-- CONTENT -->
-    <v-container class="pb-28 pt-3" fluid>
+    <v-container class="pb-16 pt-3" fluid>
       <div class="d-flex align-center justify-space-between px-1 mb-3">
         <span class="section-title">{{t('common.allDishes')}}</span>
         <span class="section-count text-caption">
@@ -236,8 +236,8 @@
   .sticky-nav {
     position: sticky;
     top: 0;
-    z-index: 50;
-    background: rgba(253, 248, 243, 0.92);
+    z-index: 10;
+    /* background: rgba(253, 248, 243, 0.92); */
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
@@ -325,7 +325,7 @@
   }
 
   /* ─── CART BUTTON TRANSITION ─── */
-  .cart-pop-enter-active {
+  /* .cart-pop-enter-active {
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
@@ -337,10 +337,10 @@
   .cart-pop-leave-to {
     transform: translateY(80px);
     opacity: 0;
-  }
+  } */
 
   /* bottom padding so last card not hidden by cart button */
-  .pb-28 {
+  .pb-16 {
     padding-bottom: 112px !important;
   }
 </style>
