@@ -1,8 +1,10 @@
 <template>
-  <v-app>
+  <v-app class="bg-grey-lighten-5">
     <Notif ref="notifRef" dismissible :default-timeout="2000" />
     <Confirm ref="confirmRef" />
-    <router-view />
+    <v-main>
+      <router-view />
+    </v-main>
     <Loading />
   </v-app>
 </template>
