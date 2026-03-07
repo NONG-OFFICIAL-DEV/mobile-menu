@@ -22,7 +22,7 @@ export function useCart() {
 
   // Calculates total price (qty * price)
   const cartTotal = computed(() =>
-    cart.value.reduce((sum, item) => sum + item.price * item.qty, 0)
+    cart.value.reduce((sum, item) => sum + item.base_price * item.qty, 0)
   )
 
   // --- ACTIONS ---

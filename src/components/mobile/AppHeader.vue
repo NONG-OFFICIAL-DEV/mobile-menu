@@ -10,6 +10,7 @@
     tableNumber: String,
     search: String,
     isOrder: Object,
+    branch: Object
   })
 
   defineEmits(['view-process', 'view-cart', 'view-history', 'update:search'])
@@ -18,7 +19,6 @@
 <template>
   <div class="app-header">
     <div class="header-inner px-4 py-2">
-
       <!-- LEFT: Brand -->
       <div class="brand d-flex align-center gap-3">
         <v-avatar size="40" rounded="lg" class="brand-avatar">
@@ -29,17 +29,15 @@
           />
         </v-avatar>
         <div>
-          <div class="brand-name">Siem Reap Kitchen</div>
+          <div class="brand-name">{{ branch?.name }}</div>
           <div class="brand-sub d-flex align-center gap-1">
             <v-icon size="10" color="success">mdi-circle</v-icon>
             <span>Open · Table {{ tableNumber ?? '–' }}</span>
           </div>
         </div>
       </div>
-
       <!-- RIGHT: Actions -->
       <div class="actions d-flex align-center gap-2">
-
         <!-- Cart icon (only when items exist) -->
         <v-btn
           v-if="totalItems"
@@ -49,11 +47,7 @@
           class="action-icon-btn"
           @click="$emit('view-cart')"
         >
-          <v-badge
-            :content="totalItems"
-            color="#E8A84A"
-            floating
-          >
+          <v-badge :content="totalItems" color="#E8A84A" floating>
             <v-icon size="20" color="#2D7A6E">mdi-cart-outline</v-icon>
           </v-badge>
         </v-btn>
@@ -74,7 +68,6 @@
         <div class="action-icon-btn d-flex align-center justify-center">
           <LanguageBottomSheet :stackedBtn="false" :iconBtn="true" />
         </div>
-
       </div>
     </div>
 
@@ -99,7 +92,7 @@
               v-if="search"
               size="16"
               color="grey"
-              style="cursor:pointer"
+              style="cursor: pointer"
               @click="$emit('update:search', '')"
             >
               mdi-close-circle
@@ -130,20 +123,20 @@
 
   /* Brand */
   .brand-avatar {
-    border: 2px solid #2D7A6E !important;
+    border: 2px solid #2d7a6e !important;
     flex-shrink: 0;
   }
 
   .brand-name {
     font-size: 15px;
     font-weight: 700;
-    color: #1C1C1E;
+    color: #1c1c1e;
     line-height: 1.2;
   }
 
   .brand-sub {
     font-size: 11px;
-    color: #8E8E93;
+    color: #8e8e93;
     font-weight: 400;
     margin-top: 1px;
   }
@@ -154,7 +147,7 @@
     height: 36px !important;
     min-width: 36px !important;
     border-radius: 12px !important;
-    background: #FFFFFF !important;
+    background: #ffffff !important;
     border: 1px solid rgba(0, 0, 0, 0.07) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
     transition: transform 0.15s;
@@ -165,9 +158,15 @@
   }
 
   /* Gap utility (for older Vuetify that might not support gap on d-flex) */
-  .gap-2 { gap: 8px; }
-  .gap-3 { gap: 12px; }
-  .gap-1 { gap: 4px; }
+  .gap-2 {
+    gap: 8px;
+  }
+  .gap-3 {
+    gap: 12px;
+  }
+  .gap-1 {
+    gap: 4px;
+  }
 
   /* Search */
   .search-area {
@@ -177,12 +176,12 @@
   :deep(.search-field .v-field) {
     border-radius: 14px !important;
     font-size: 14px;
-    background: rgba(0,0,0,0.05) !important;
+    background: rgba(0, 0, 0, 0.05) !important;
   }
 
   :deep(.search-field .v-field--focused) {
     background: #fff !important;
-    outline: 1.5px solid #2D7A6E;
+    outline: 1.5px solid #2d7a6e;
   }
 
   :deep(.search-field .v-field__input) {

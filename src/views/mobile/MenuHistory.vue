@@ -1,17 +1,14 @@
 <script setup>
-  import { useRouter, useRoute } from 'vue-router'
   import CurrentOrder from '@/components/mobile/CurrentOrder.vue'
   import { useCart } from '@/composables/useCart'
 
   const { clearCart } = useCart()
+  import { useMenuNav } from '../../composables/useMenuNav'
 
-  const router = useRouter()
-  const route = useRoute()
-  const token = route.params.token
-
+  const { goToMenu } = useMenuNav()
   function close() {
     clearCart()
-    router.push({ name: 'menu.home', params: { token } })
+    goToMenu()
   }
 </script>
 

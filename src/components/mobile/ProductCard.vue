@@ -28,6 +28,9 @@
 
   const activeProduct = computed(() => selectedProduct.value)
 
+  const sortedItems = computed(() =>
+    [...(props.items || [])].sort((a, b) => a.sort_order - b.sort_order)
+  )
   // ----------------------
   // Helpers
   // ----------------------
@@ -193,11 +196,8 @@
 
   <!-- Product Grid -->
   <v-row class="pa-0">
-    <transition-group
-      name="card-pop"
-      appear
-    >
-      <v-col v-for="p in items" :key="p.id" cols="6" class="pa-2">
+    <transition-group name="card-pop" appear>
+      <v-col v-for="p in sortedItems" :key="p.id" cols="6" class="pa-2">
         <v-card flat rounded="xl" class="pa-3 product-card border">
           <v-img
             :src="p.image_url"
@@ -216,10 +216,10 @@
               v-if="p.has_variants"
               class="text-subtitle-1 font-weight-black"
             >
-              ${{ p.variants?.[0]?.price }}
+              ${{ p.variants?.[0]?.base_price }}
             </span>
             <span v-else class="text-subtitle-1 font-weight-black">
-              ${{ p.price }}
+              ${{ p.base_price }}
             </span>
 
             <!-- Add / Qty control -->
@@ -371,7 +371,7 @@
         @click="confirmAddVariant"
       >
         CONFIRM ORDER
-        {{ formatCurrency(selectedVariantQty * selectedVariant?.price) }}
+        {{ formatCurrency(selectedVariantQty * selectedVariant?.base_price) }}
       </v-btn>
       <!-- </div> -->
     </v-card>

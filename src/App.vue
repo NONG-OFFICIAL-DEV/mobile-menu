@@ -5,7 +5,7 @@
     <v-main>
       <router-view />
     </v-main>
-    <Loading />
+    <!-- <Loading /> -->
   </v-app>
 </template>
 
@@ -13,7 +13,7 @@
   import { ref, onMounted, getCurrentInstance } from 'vue'
   import Notif from '@/components/global/Notification.vue'
   import Confirm from '@/components/global/Confirm.vue'
-  import Loading from '@/components/global/Loading.vue'
+  // import Loading from '@/components/global/Loading.vue'
 
   // Refs to components
   const notifRef = ref(null)

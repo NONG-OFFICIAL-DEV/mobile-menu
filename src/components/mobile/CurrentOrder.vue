@@ -2,35 +2,31 @@
   import { computed, ref, onMounted } from 'vue'
   import CustomAppHeader from './CustomAppHeader.vue'
   import { useOrderStore } from '@/stores/orderStore'
-  import { useDiningTableStore } from '../../stores/diningTableStore'
   import { useI18n } from 'vue-i18n'
-  import { useRoute } from 'vue-router'
   import { formatDateText } from '@nong-official-dev/core'
-
   import { useLoadingStore } from '@/stores/loadingStore'
-
-  const loadingStore = useLoadingStore()
+  import { useMenuNav } from '../../composables/useMenuNav'
   import { formatCurrency } from '@nong-official-dev/core'
 
-  defineEmits(['close'])
+const emit = defineEmits(['close'])
+
   const { t } = useI18n()
+  const { tableId, goToMenu } = useMenuNav()
+  const loadingStore = useLoadingStore()
   const orderStore = useOrderStore()
-  const diningTableStore = useDiningTableStore()
-  const route = useRoute()
-  const token = route.params.token
   const order = ref({})
 
   const totalAmount = computed(() => {
     return (order.value.items ?? []).reduce(
-      (sum, item) => sum + item.price * item.qty,
+      (sum, item) => sum + item.unit_price * item.quantity,
       0
     )
   })
 
   onMounted(async () => {
     try {
-      const res = await diningTableStore.getTableNumberByToken(token)
-      order.value = await orderStore.fetchOrderByTable(res.table.id)
+      const response = await orderStore.fetchOrderByTable(tableId.value)
+      order.value = response.data
     } catch (err) {
       console.error('Error fetching table or order details:', err)
     }
@@ -52,7 +48,7 @@
           {{ t('common.date') }}: {{ formatDateText(order.order_date) }}
         </div>
         <div class="text-caption">
-          {{ t('common.orderId') }}: #{{ order.order_no }}
+          {{ t('common.orderId') }}: #{{ order.order_number }}
         </div>
       </div>
       <div class="receipt-divider mb-4"></div>
@@ -72,8 +68,8 @@
         </thead>
         <tbody>
           <tr v-for="item in order.items" :key="item.id">
-            <td class="text-body-2 font-weight-bold px-0" width="150">
-              {{ item.name }}
+            <td class="text-body-2 px-0" width="150">
+              {{ item.product_name }}
               <div
                 v-if="item.variant_name"
                 class="text-caption text-grey-darken-1"
@@ -88,9 +84,9 @@
                 {{ item.note }}
               </div>
             </td>
-            <td class="text-center text-body-2 px-0">{{ item.qty }}</td>
+            <td class="text-center text-body-2 px-0">{{ item.quantity }}</td>
             <td class="text-right text-body-2 px-0">
-              {{ formatCurrency(item.price * item.qty) }}
+              {{ formatCurrency(item.unit_price * item.quantity) }}
             </td>
           </tr>
         </tbody>

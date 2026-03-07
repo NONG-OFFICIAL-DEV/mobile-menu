@@ -79,7 +79,7 @@
                 </div>
               </div>
               <div class="price-tag">
-                {{ formatCurrency(item.price * item.qty) }}
+                {{ formatCurrency(item.base_price * item.qty) }}
               </div>
             </div>
 
@@ -182,7 +182,7 @@
   const totalAmount = computed(() => {
     if (!order.value || !order.value.items) return '0.00'
     return order.value.items
-      .reduce((sum, item) => sum + item.price * item.qty, 0)
+      .reduce((sum, item) => sum + item.base_price * item.qty, 0)
       .toFixed(2)
   })
 

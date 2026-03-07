@@ -179,10 +179,10 @@
                   <span
                     class="text-teal-darken-3 font-weight-black text-subtitle-1"
                   >
-                    {{ formatCurrency(item.price * item.qty) }}
+                    {{ formatCurrency(item.base_price * item.qty) }}
                   </span>
                   <span class="text-caption text-grey-darken-1">
-                    {{ formatCurrency(item.price) }} / {{ t('common.items') }}
+                    {{ formatCurrency(item.base_price) }} / {{ t('common.items') }}
                   </span>
                 </div>
 
