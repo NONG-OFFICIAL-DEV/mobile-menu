@@ -1,13 +1,12 @@
 <script setup>
   import CurrentOrder from '@/components/mobile/CurrentOrder.vue'
-  import { useCart } from '@/composables/useCart'
-
-  const { clearCart } = useCart()
+  import { useCartStore } from '@/stores/cartStore'
   import { useMenuNav } from '../../composables/useMenuNav'
 
+  const cartStore = useCartStore()
   const { goToMenu } = useMenuNav()
   function close() {
-    clearCart()
+    cartStore.clearCart()
     goToMenu()
   }
 </script>

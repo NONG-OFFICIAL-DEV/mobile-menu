@@ -45,7 +45,22 @@
     "notePlaceholder": "Example: No spicy, no sugar, extra sauce...",
     "tryOrderWord": "Try a different category or keyword",
     "dishes": "Dishes",
-    "allDishes": "All Dishes"
+    "allDishes": "All Dishes",
+    "popular": "Popular",
+    "open": "Open",
+    "closed": "Closed",
+    "unavailable": "Unavailable",
+    "clearSearch": "Clear search",
+    "clearCart": "Clear cart",
+    "clearCartTitle": "Clear your cart?",
+    "clearCartMessage": "This will remove every item from your cart.",
+    "decreaseQty": "Decrease quantity",
+    "increaseQty": "Increase quantity",
+    "size": "Size",
+    "sugar": "Sugar",
+    "maxPerItem": "Max {max} per item",
+    "close": "Close",
+    "dismiss": "Dismiss"
   },
   "lang": {
     "km": "Khmer",
@@ -77,7 +92,8 @@
   "banner": {
     "todaySpecial": "Today's Special",
     "orderByPhone": "Order dishes and drinks using your phone",
-    "newDishes": "New Dishes"
+    "newDishes": "New Dishes",
+    "closedMessage": "This branch is currently closed. You can still browse."
   },
   "quickNotes": {
     "noSpicy": "No spicy 🌶️",

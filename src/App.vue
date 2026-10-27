@@ -1,40 +1,17 @@
 <template>
-  <v-app class="bg-grey-lighten-5">
-    <Notif ref="notifRef" dismissible :default-timeout="2000" />
-    <Confirm ref="confirmRef" />
-    <v-main>
+  <MotionConfig :reduced-motion="'user'">
+    <div class="min-h-dvh bg-ivory">
+      <Notif />
+      <Confirm />
       <router-view />
-    </v-main>
-    <!-- <Loading /> -->
-  </v-app>
+    </div>
+  </MotionConfig>
 </template>
 
 <script setup>
-  import { ref, onMounted, getCurrentInstance } from 'vue'
+  import { MotionConfig } from 'motion-v'
   import Notif from '@/components/global/Notification.vue'
   import Confirm from '@/components/global/Confirm.vue'
-  // import Loading from '@/components/global/Loading.vue'
-
-  // Refs to components
-  const notifRef = ref(null)
-  const confirmRef = ref(null)
-
-  // Get current Vue instance
-  const instance = getCurrentInstance()
-
-  onMounted(() => {
-    const app = instance.appContext.app
-
-    // Register global methods for both Options and Composition APIs
-    app.config.globalProperties.$notif = notifRef.value?.newAlert
-    app.config.globalProperties.$confirm = confirmRef.value?.open
-
-    // Restore saved language preference
-    const savedLang = localStorage.getItem('lang')
-    if (savedLang) {
-      instance.appContext.config.globalProperties.$i18n.locale = savedLang
-    }
-  })
 </script>
 
 <style>
@@ -50,15 +27,11 @@
   #app {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #2c3e50;
+    color: #292720;
     -webkit-text-size-adjust: 100%;
   }
 
-  body {
-    font-family: 'Poppins', sans-serif;
-  }
   ::-webkit-scrollbar {
     display: none;
   }
-
 </style>

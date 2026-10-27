@@ -1,7 +1,7 @@
 // composables/useNotif.js
-import { getCurrentInstance } from 'vue'
+import { useUiStore } from '@/stores/uiStore'
 
 export function useNotif() {
-  const { proxy } = getCurrentInstance()
-  return proxy.$notif
+  const ui = useUiStore()
+  return ui.notify
 }

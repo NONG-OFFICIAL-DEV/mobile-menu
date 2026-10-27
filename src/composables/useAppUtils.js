@@ -1,10 +1,10 @@
-import { getCurrentInstance } from 'vue'
+import { useUiStore } from '@/stores/uiStore'
 
 export function useAppUtils() {
-  const { proxy } = getCurrentInstance()
+  const ui = useUiStore()
 
   return {
-    confirm: proxy.$confirm,
-    notif: proxy.$notif,
+    confirm: ui.confirm,
+    notif: ui.notify
   }
 }

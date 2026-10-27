@@ -1,26 +1,28 @@
-<script setup>
+<script setup lang="ts">
   import { ref, computed, onMounted } from 'vue'
-  import { useRouter, useRoute } from 'vue-router'
+  import { useRoute } from 'vue-router'
   import { useI18n } from 'vue-i18n'
+  import { AnimatePresence, motion } from 'motion-v'
+  import { RefreshCw, UtensilsCrossed, StoreIcon } from 'lucide-vue-next'
   import AppHeader from '../../components/mobile/AppHeader.vue'
   import CategoryTabs from '@/components/mobile/CategoryTabs.vue'
   import ProductCard from '@/components/mobile/ProductCard.vue'
+  import ProductCustomizeSheet from '@/components/mobile/ProductCustomizeSheet.vue'
   import CartButton from '@/components/mobile/CartButton.vue'
+  import AppContainer from '@/components/ui/AppContainer.vue'
+  import BaseButton from '@/components/ui/BaseButton.vue'
 
-  import { useCart } from '@/composables/useCart'
-  import { useLoadingStore } from '@/stores/loadingStore'
+  import { useCartStore } from '@/stores/cartStore'
+  import { useNotif } from '@/composables/useNotif'
   import { useOrderStore } from '@/stores/orderStore'
   import { useDigitalMenuStore } from '@/stores/digitalMenuStore'
   import { storeToRefs } from 'pinia'
   import { useMenuNav } from '../../composables/useMenuNav'
 
-  const { branchSlug, tableId, goToHistory, goToCart, goToTracking } =
-    useMenuNav()
+  const { branchSlug, tableId, goToHistory, goToCart, goToTracking } = useMenuNav()
   const { t } = useI18n()
-  const router = useRouter()
   const route = useRoute()
 
-  const loadingStore = useLoadingStore()
   const orderStore = useOrderStore()
   const digitalMenuStore = useDigitalMenuStore()
 
@@ -34,27 +36,30 @@
   } = storeToRefs(digitalMenuStore)
 
   const allProducts = computed(() => digitalMenuStore.allProducts)
-  const { cart, totalItems, cartTotal, addToCart, updateQty } = useCart()
+  const cartStore = useCartStore()
+  const { items: cart, totalItems, cartTotal } = storeToRefs(cartStore)
+  const { addToCart, updateQty } = cartStore
+  const notif = useNotif()
 
-  const order = ref(null)
-  const selectedCategory = ref('All')
+  const order = ref<{ items?: unknown[] } | null>(null)
+  const selectedCategory = ref<number | string>('All')
   const search = ref('')
 
-  // ── Filtered products ──────────────────────────────────────────────────────
+  const showHeaderContext = computed(() => ['menu.home', 'menu.table'].includes(route.name as string))
+
+  const featuredProducts = computed(() => allProducts.value.filter((p: any) => p.is_featured))
+
   const filteredProducts = computed(() => {
     let list =
       selectedCategory.value === 'All'
         ? allProducts.value
-        : allProducts.value.filter(
-            p => p.category?.id === selectedCategory.value
-          )
+        : allProducts.value.filter((p: any) => p.category?.id === selectedCategory.value)
 
-    if (search.value?.trim()) {
+    if (search.value.trim()) {
       const q = search.value.toLowerCase()
       list = list.filter(
-        p =>
-          p.name?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q)
+        (p: any) =>
+          p.name?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
       )
     }
     return list
@@ -65,287 +70,194 @@
     selectedCategory.value = 'All'
   }
 
-  // ── Init ───────────────────────────────────────────────────────────────────
+  // ── Product customization sheet ───────────────────────────────────────────
+  const customizeOpen = ref(false)
+  const customizeProduct = ref<any>(null)
+
+  function openCustomize(product: any) {
+    customizeProduct.value = product
+    customizeOpen.value = true
+  }
+
+  function handleCustomizeAdd(item: any) {
+    addToCart(item)
+  }
+
+  function handleCustomizeLimit() {
+    notif?.(t('notification.limitOrder'), { type: 'warning' })
+  }
+
   onMounted(async () => {
     await digitalMenuStore.fetchDigitalMenus(branchSlug.value, tableId.value)
     if (tableId.value) {
       const response = await orderStore.fetchOrderByTable(tableId.value)
       order.value = response.data
     }
-
-    if (route.name === 'menu.cart' && cart.value.length === 0) {
-      router.replace({
-        name: 'menu.home',
-        params: { branchSlug: branchSlug.value }
-      })
-    }
   })
 </script>
 
 <template>
-  <div class="page-bg">
-    <!-- HEADER — show on both menu.home and menu.table -->
+  <div class="min-h-dvh bg-ivory pb-28">
     <AppHeader
-      v-if="['menu.home', 'menu.table'].includes($route.name)"
-      :isOrder="order || {}"
-      :tableNumber="tableNumber"
+      v-if="showHeaderContext"
+      :is-order="order || {}"
+      :table-number="tableNumber"
       :branch="branch"
       @view-process="goToTracking"
       @view-history="goToHistory"
       @view-cart="goToCart"
     />
-    <!-- STICKY CATEGORY NAV -->
-    <div class="sticky-nav">
+
+    <div class="sticky top-[65px] z-10">
       <CategoryTabs
         :categories="categories"
-        :isLoading="isLoading"
+        :is-loading="isLoading"
         v-model="selectedCategory"
         v-model:search="search"
       />
     </div>
 
-    <!-- HERO BANNER — only on menu.table (dine-in with table context) -->
-    <div
-      v-if="['menu.home', 'menu.table'].includes($route.name) && !isLoading"
-      class="hero-wrap px-4 pt-3 pb-1"
-    >
-      <v-card
-        rounded="xl"
-        class="hero-card pa-5 d-flex align-center"
-        flat
-        elevation="0"
-      >
-        <div>
-          <p
-            class="hero-label text-caption font-weight-bold mb-1 text-uppercase"
-          >
-            🔥 {{ t('banner.todaySpecial') }}
-          </p>
-          <h2 class="hero-title font-weight-black">
-            {{ branch?.business_name || t('banner.orderByPhone') }}
-          </h2>
-          <p class="hero-sub text-caption mt-1">
-            <span v-if="tableInfo">🪑 Table {{ tableInfo.number }}</span>
-            <span v-else>{{ t('banner.newDishes') }}</span>
-          </p>
-        </div>
-        <v-spacer />
-        <v-avatar size="80" rounded="xl" class="hero-img-avatar">
-          <v-img
-            :src="
-              branch?.logo_url ||
-              'https://i.pinimg.com/736x/52/a5/14/52a514a2948c9e7eaff650e4143e8c60.jpg'
-            "
-            cover
+    <AppContainer>
+      <!-- Hero / context banner -->
+      <div v-if="showHeaderContext && !isLoading" class="pt-3 pb-1">
+        <div class="flex items-center gap-4 rounded-card border border-charcoal/[0.06] bg-white p-5 shadow-soft">
+          <div class="min-w-0 flex-1">
+            <p class="mb-1 text-[11px] font-bold tracking-wide text-olive uppercase">
+              {{ t('banner.todaySpecial') }}
+            </p>
+            <h1 class="truncate text-lg font-extrabold text-charcoal">
+              {{ branch?.business_name || branch?.name || t('banner.orderByPhone') }}
+            </h1>
+            <p class="mt-1 text-sm text-charcoal/50">
+              <span v-if="tableInfo">{{ t('common.table') }} {{ tableInfo.number }}</span>
+              <span v-else>{{ t('banner.newDishes') }}</span>
+            </p>
+          </div>
+          <img
+            v-if="branch?.logo_url"
+            :src="branch.logo_url"
+            alt=""
+            class="h-16 w-16 shrink-0 rounded-card object-cover"
           />
-        </v-avatar>
-        <span class="hero-decor hero-decor-1" />
-        <span class="hero-decor hero-decor-2" />
-      </v-card>
-    </div>
+        </div>
+      </div>
 
-    <!-- Branch closed warning -->
-    <v-alert
-      v-if="branch && !branch.is_open"
-      type="warning"
-      variant="tonal"
-      rounded="0"
-      density="compact"
-      class="mx-0"
-      icon="mdi-store-off-outline"
-      text="This branch is currently closed. You can still browse."
-    />
+      <!-- Branch closed -->
+      <div
+        v-if="branch && branch.is_open === false"
+        class="mt-3 flex items-center gap-2 rounded-card border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+      >
+        <StoreIcon :size="16" />
+        <span>{{ t('banner.closedMessage') }}</span>
+      </div>
 
-    <!-- Error -->
-    <v-alert
-      v-if="error"
-      type="error"
-      variant="tonal"
-      rounded="lg"
-      class="ma-4"
-      :text="error"
-    />
+      <!-- Error -->
+      <div
+        v-if="error"
+        class="mt-3 rounded-card border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      >
+        {{ error }}
+      </div>
 
-    <!-- CONTENT -->
-    <v-container class="pb-16 pt-3" fluid>
-      <div class="d-flex align-center justify-space-between px-1 mb-3">
-        <span class="section-title">{{ t('common.allDishes') }}</span>
-        <span class="section-count text-caption">
+      <!-- Featured rail -->
+      <div v-if="featuredProducts.length && !isLoading" class="pt-4">
+        <div class="mb-2 px-1 text-sm font-bold text-charcoal">{{ t('common.popular') }}</div>
+        <div class="scrollbar-none flex gap-3 overflow-x-auto pb-1">
+          <div
+            v-for="p in featuredProducts"
+            :key="`featured-${p.id}`"
+            class="w-32 shrink-0 rounded-card border border-charcoal/[0.06] bg-white p-2 shadow-soft"
+          >
+            <img
+              v-if="p.image_url"
+              :src="p.image_url"
+              :alt="p.name"
+              class="mb-2 h-20 w-full rounded-card object-cover"
+            />
+            <div class="truncate text-xs font-semibold text-charcoal">{{ p.name }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section heading -->
+      <div class="flex items-center justify-between px-1 pt-4 pb-3">
+        <span class="text-base font-bold text-charcoal">{{ t('common.allDishes') }}</span>
+        <span class="text-xs text-charcoal/40">
           {{ filteredProducts.length }} {{ t('common.dishes') }}
         </span>
       </div>
 
-      <v-row dense>
-        <!-- SKELETON -->
-        <template v-if="isLoading && loadingStore.mode === 'skeleton'">
-          <v-col v-for="n in 6" :key="n" cols="6" class="pa-2">
-            <v-card flat rounded="xl" class="pa-3 bg-white">
-              <div class="d-flex justify-space-between align-center">
-                <v-skeleton-loader
-                  type="avatar"
-                  height="100"
-                  class="image mx-auto mb-2"
-                />
-              </div>
-              <v-skeleton-loader type="text" width="80%" class="mx-auto mb-4" />
-              <div class="d-flex justify-space-between align-center">
-                <v-skeleton-loader type="text" width="40%" />
-                <v-skeleton-loader type="avatar" size="32" />
-              </div>
-            </v-card>
-          </v-col>
-        </template>
+      <!-- Skeleton -->
+      <div v-if="isLoading" class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+        <div v-for="n in 6" :key="n" class="rounded-card border border-charcoal/[0.06] bg-white p-3">
+          <div class="mb-3 aspect-square animate-pulse rounded-card bg-charcoal/[0.06]" />
+          <div class="mb-2 h-3 w-3/4 animate-pulse rounded bg-charcoal/[0.06]" />
+          <div class="h-3 w-1/3 animate-pulse rounded bg-charcoal/[0.06]" />
+        </div>
+      </div>
 
-        <!-- EMPTY -->
-        <template v-else-if="filteredProducts.length === 0 && !isLoading">
-          <v-col cols="12">
-            <div
-              class="empty-state d-flex flex-column align-center justify-center py-16 px-4"
-            >
-              <div class="empty-icon-wrap mb-5">
-                <v-icon size="40" color="primary">
-                  mdi-silverware-fork-knife
-                </v-icon>
-              </div>
-              <p class="text-subtitle-1 font-weight-bold mb-1">
-                {{ t('common.dishesFound') }}
-              </p>
-              <p class="text-caption text-medium-emphasis mb-5">
-                {{ t('common.tryOrderWord') }}
-              </p>
-              <v-btn
-                color="primary"
-                variant="tonal"
-                rounded="pill"
-                size="small"
-                prepend-icon="mdi-refresh"
-                @click="reFilter"
-              >
-                {{ t('btn.reFilter') }}
-              </v-btn>
-            </div>
-          </v-col>
-        </template>
+      <!-- Empty -->
+      <div v-else-if="filteredProducts.length === 0" class="flex flex-col items-center py-16 text-center">
+        <div class="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-olive/10">
+          <UtensilsCrossed :size="32" class="text-olive" />
+        </div>
+        <p class="mb-1 text-[15px] font-bold text-charcoal">{{ t('common.dishesFound') }}</p>
+        <p class="mb-5 text-sm text-charcoal/50">{{ t('common.tryOrderWord') }}</p>
+        <BaseButton variant="secondary" size="sm" @click="reFilter">
+          <template #icon-left><RefreshCw :size="14" /></template>
+          {{ t('btn.reFilter') }}
+        </BaseButton>
+      </div>
 
-        <!-- PRODUCTS -->
-        <template v-else>
+      <!-- Products -->
+      <AnimatePresence v-else mode="popLayout">
+        <motion.div
+          key="grid"
+          :initial="{ opacity: 0 }"
+          :animate="{ opacity: 1 }"
+          :exit="{ opacity: 0 }"
+          :transition="{ duration: 0.15 }"
+        >
           <ProductCard
             :items="filteredProducts"
             :cart="cart"
             @add="addToCart"
             @update="updateQty"
+            @customize="openCustomize"
           />
-        </template>
-      </v-row>
-    </v-container>
+        </motion.div>
+      </AnimatePresence>
+    </AppContainer>
 
-    <!-- CART FLOAT BUTTON -->
-    <transition name="cart-pop">
-      <CartButton
+    <ProductCustomizeSheet
+      v-model="customizeOpen"
+      :product="customizeProduct"
+      :cart="cart"
+      @add="handleCustomizeAdd"
+      @limit="handleCustomizeLimit"
+    />
+
+    <AnimatePresence>
+      <motion.div
         v-if="cart.length"
-        :totalItems="totalItems"
-        :totalPrice="cartTotal"
-        @open="goToCart"
-      />
-    </transition>
+        key="cart-btn"
+        :initial="{ opacity: 0, y: 40 }"
+        :animate="{ opacity: 1, y: 0 }"
+        :exit="{ opacity: 0, y: 40 }"
+        :transition="{ type: 'spring', stiffness: 400, damping: 32 }"
+      >
+        <CartButton :total-items="totalItems" :total-price="cartTotal" @open="goToCart" />
+      </motion.div>
+    </AnimatePresence>
   </div>
 </template>
 
 <style scoped>
-  :deep(.image .v-skeleton-loader__avatar) {
-    max-height: 100px;
-    min-height: 100px;
-    height: 100px;
-    max-width: 100px;
-    min-width: 100px;
-    width: 100px;
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  .sticky-nav {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  .hero-card {
-    background: linear-gradient(135deg, #2d7a6e 0%, #1a5c52 100%) !important;
-    min-height: 130px;
-    overflow: hidden;
-    position: relative;
-  }
-  .hero-label {
-    color: rgba(255, 255, 255, 0.7);
-    letter-spacing: 1px;
-  }
-  .hero-title {
-    font-size: 22px;
-    color: #fff;
-    line-height: 1.2;
-    font-family: 'Georgia', serif;
-  }
-  .hero-sub {
-    color: rgba(255, 255, 255, 0.65);
-  }
-  .hero-img-avatar {
-    border-radius: 16px !important;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    flex-shrink: 0;
-  }
-  .hero-decor {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    pointer-events: none;
-  }
-  .hero-decor-1 {
-    width: 100px;
-    height: 100px;
-    bottom: -30px;
-    right: -10px;
-  }
-  .hero-decor-2 {
-    width: 60px;
-    height: 60px;
-    top: -20px;
-    right: 80px;
-  }
-  .section-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1c1c1e;
-    letter-spacing: -0.2px;
-  }
-  .section-count {
-    color: #8e8e93;
-    font-weight: 500;
-  }
-  .empty-icon-wrap {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: rgba(45, 122, 110, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .cart-pop-enter-active {
-    animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .cart-pop-leave-active {
-    animation: pop-in 0.2s reverse;
-  }
-  @keyframes pop-in {
-    0% {
-      transform: scale(0.5) translateY(100px);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-    }
-  }
-  .pb-16 {
-    padding-bottom: 112px !important;
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 </style>

@@ -1,392 +1,215 @@
-<script setup>
-  import { computed, ref } from 'vue'
-  import CustomAppHeader from './CustomAppHeader.vue'
+<script setup lang="ts">
+  import { ref, computed } from 'vue'
+  import { AnimatePresence, motion } from 'motion-v'
   import { useI18n } from 'vue-i18n'
+  import { ShoppingBag, Trash2, StickyNote, ChevronRight, ImageOff } from 'lucide-vue-next'
+  import { formatCurrency } from '@nong-official-dev/core'
+  import CustomAppHeader from './CustomAppHeader.vue'
+  import QtyStepper from '../customs/QtyStepper.vue'
+  import BaseButton from '@/components/ui/BaseButton.vue'
+  import BaseIconButton from '@/components/ui/BaseIconButton.vue'
+  import BaseBottomSheet from '@/components/ui/BaseBottomSheet.vue'
+  import { useCartStore } from '@/stores/cartStore'
   import { useAppUtils } from '@/composables/useAppUtils'
-  const { confirm, notif } = useAppUtils()
+  import type { CartItem } from '@/stores/cartStore'
 
   const { t, tm } = useI18n()
-  import QtyStepper from '../customs/QtyStepper.vue'
-  import { formatCurrency } from '@nong-official-dev/core'
+  const { confirm, notif } = useAppUtils()
+  const cartStore = useCartStore()
 
-  const prop = defineProps({
-    cart: {
-      type: Array,
-      default: () => []
-    },
-    total: {
-      type: Number,
-      default: 0
-    },
-    tableNumber: Number,
-    loading: Boolean
-  })
-  const emit = defineEmits(['back', 'update', 'submit', 'clear', 'update-note'])
+  defineProps<{
+    tableNumber?: number | string | null
+    loading?: boolean
+  }>()
 
-  const totalItems = computed(() => {
-    return prop.cart.length
-  })
+  const emit = defineEmits<{
+    back: []
+    submit: []
+  }>()
+
+  const noteSheetOpen = ref(false)
+  const selectedItem = ref<CartItem | null>(null)
+  const noteDraft = ref('')
+
   const noteSuggestions = computed(() => {
-    const notes = tm('quickNotes') // tm returns object (not translated string)
-    return Object.keys(notes).map(key => ({
-      key,
-      label: t(`quickNotes.${key}`)
-    }))
+    const notes = tm('quickNotes') as Record<string, unknown>
+    return Object.keys(notes).map(key => ({ key, label: t(`quickNotes.${key}`) }))
   })
-  const noteDialog = ref(false)
-  const selectedItem = ref(null)
-  const noteValue = ref('')
 
-  function openNote(item) {
+  function openNote(item: CartItem) {
     selectedItem.value = item
-    noteValue.value = item.note || ''
-    noteDialog.value = true
+    noteDraft.value = item.note || ''
+    noteSheetOpen.value = true
   }
 
   function saveNote() {
     if (!selectedItem.value) return
-
-    // Emit to parent to update cart item note
-    // We pass itemId + note
-    emit('update-note', selectedItem.value.id, noteValue.value)
-
-    noteDialog.value = false
-  }
-
-  function cancelNote() {
-    noteDialog.value = false
+    cartStore.updateNote(selectedItem.value.id, noteDraft.value)
+    noteSheetOpen.value = false
   }
 
   function confirmClear() {
     confirm({
-      title: 'Delete this item?',
-      message: 'This action cannot be undone.',
-      options: {
-        type: 'error',
-        color: 'error',
-        width: 500
-      },
-      agree: async () => {
-        emit('clear')
-        notif(t('message.clear'), {
-          type: 'success',
-          color: 'primary'
-        })
+      title: t('common.clearCartTitle'),
+      message: t('common.clearCartMessage'),
+      options: { type: 'error' },
+      agree: () => {
+        cartStore.clearCart()
+        notif(t('message.clear'), { type: 'success' })
       }
     })
   }
 </script>
 
 <template>
-  <div class="cart-page-wrapper">
-    <CustomAppHeader
-      :title="t('header.orderTitle')"
-      :showBack="true"
-      @back="$emit('back')"
-    >
+  <div class="flex h-dvh flex-col bg-ivory">
+    <CustomAppHeader :title="t('header.orderTitle')" @back="$emit('back')">
       <template #right>
-        <v-btn
-          v-if="cart.length > 0"
-          icon="mdi-delete-outline"
-          variant="text"
-          color="error"
-          size="32"
-          class="action-btn"
-          @click="confirmClear()"
+        <BaseIconButton
+          v-if="cartStore.items.length > 0"
+          :icon="Trash2"
+          :label="t('common.clearCart')"
+          size="sm"
+          @click="confirmClear"
         />
       </template>
     </CustomAppHeader>
 
-    <main class="scroll-content pa-4">
-      <v-fade-transition hide-on-leave>
-        <div v-if="cart.length === 0" class="text-center py-12">
-          <v-avatar color="grey-lighten-4" size="80" class="mb-4">
-            <v-icon size="40" color="grey-lighten-1">mdi-cart-outline</v-icon>
-          </v-avatar>
-          <p class="text-body-2 text-medium-emphasis">
-            {{ t('common.emptyCart') }}
-          </p>
-          <v-btn
-            color="primary"
-            class="mt-4"
-            block
-            rounded="pill"
-            elevation="1"
-            prepend-icon="mdi-silverware-fork-knife"
-            @click="$emit('back')"
-          >
-            {{ t('btn.order') }}
-          </v-btn>
+    <main class="flex-1 overflow-y-auto px-4 pb-6 pt-4">
+      <div v-if="cartStore.items.length === 0" class="flex flex-col items-center py-16 text-center">
+        <div class="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-charcoal/[0.04]">
+          <ShoppingBag :size="32" class="text-charcoal/30" />
         </div>
-      </v-fade-transition>
+        <p class="mb-5 text-sm text-charcoal/50">{{ t('common.emptyCart') }}</p>
+        <BaseButton full-width @click="$emit('back')">{{ t('btn.order') }}</BaseButton>
+      </div>
 
-      <div v-if="cart.length > 0">
-        <v-card
-          v-for="item in cart"
+      <AnimatePresence v-else>
+        <motion.div
+          v-for="item in cartStore.items"
           :key="item.id"
-          flat
-          class="cart-card mb-4 border rounded-xl"
+          layout
+          class="mb-3 flex gap-3 rounded-card border border-charcoal/[0.06] bg-white p-3 shadow-soft"
+          :initial="{ opacity: 0, y: 10 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :exit="{ opacity: 0, height: 0, marginBottom: 0, paddingTop: 0, paddingBottom: 0 }"
+          :transition="{ duration: 0.2 }"
         >
-          <div class="d-flex pa-3">
-            <v-img
+          <div class="h-20 w-20 shrink-0 overflow-hidden rounded-card bg-ivory">
+            <img
+              v-if="item.image_url"
               :src="item.image_url"
-              width="90"
-              height="90"
-              cover
-              class="rounded-lg flex-grow-0 shadow-sm border"
+              :alt="item.name"
+              class="h-full w-full object-cover"
             />
-
-            <div class="ml-4 flex-grow-1 d-flex flex-column">
-              <div class="d-flex justify-space-between align-start mb-1">
-                <div class="pr-2">
-                  <div class="font-weight-black text-body-1 line-height-tight">
-                    {{ item.name }}
-                  </div>
-
-                  <div
-                    class="text-caption text-grey-darken-1 mt-1"
-                    v-if="item.has_variants"
-                  >
-                    {{ item.customizations.variant_name }}
-                    <span v-if="item.customizations.sugar">
-                      | {{ item.customizations.sugar }}% Sugar
-                    </span>
-                  </div>
-
-                  <div
-                    v-if="item.note"
-                    class="text-caption text-primary font-italic mt-1 d-flex align-center"
-                  >
-                    <v-icon size="14" class="mr-1">
-                      mdi-note-text-outline
-                    </v-icon>
-                    {{ item.note }}
-                  </div>
-                </div>
-
-                <v-btn
-                  icon="mdi-note-edit-outline"
-                  variant="tonal"
-                  :color="item.note ? 'primary' : 'grey-lighten'"
-                  size="32"
-                  class="rounded-lg flex-shrink-0"
-                  @click="openNote(item)"
-                ></v-btn>
-              </div>
-
-              <div class="mt-auto d-flex justify-space-between align-center">
-                <div class="d-flex flex-column">
-                  <span
-                    class="text-teal-darken-3 font-weight-black text-subtitle-1"
-                  >
-                    {{ formatCurrency(item.base_price * item.qty) }}
-                  </span>
-                  <span class="text-caption text-grey-darken-1">
-                    {{ formatCurrency(item.base_price) }} / {{ t('common.items') }}
-                  </span>
-                </div>
-
-                <QtyStepper
-                  :modelValue="item.qty"
-                  small
-                  strict
-                  :max="5"
-                  :min="0"
-                  @change="delta => $emit('update', item.id, delta)"
-                />
-              </div>
+            <div v-else class="flex h-full w-full items-center justify-center text-charcoal/20">
+              <ImageOff :size="20" />
             </div>
           </div>
-        </v-card>
-      </div>
+
+          <div class="flex min-w-0 flex-1 flex-col">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <div class="truncate text-[15px] font-bold text-charcoal">{{ item.name }}</div>
+                <div v-if="item.has_variants" class="text-xs text-charcoal/50">
+                  {{ (item.customizations as any)?.variant_name }}
+                  <span v-if="(item.customizations as any)?.sugar !== undefined">
+                    · {{ (item.customizations as any).sugar }}% sugar
+                  </span>
+                </div>
+                <div v-if="item.note" class="mt-1 flex items-center gap-1 text-xs italic text-olive">
+                  <StickyNote :size="12" />
+                  <span class="truncate">{{ item.note }}</span>
+                </div>
+              </div>
+
+              <BaseIconButton
+                :icon="StickyNote"
+                :label="t('common.editNote')"
+                size="sm"
+                :variant="item.note ? 'surface' : 'ghost'"
+                @click="openNote(item)"
+              />
+            </div>
+
+            <div class="mt-auto flex items-end justify-between pt-2">
+              <div>
+                <div class="text-[15px] font-extrabold text-charcoal">
+                  {{ formatCurrency(item.base_price * item.qty) }}
+                </div>
+                <div class="text-xs text-charcoal/40">
+                  {{ formatCurrency(item.base_price) }} / {{ t('common.items') }}
+                </div>
+              </div>
+              <QtyStepper
+                small
+                strict
+                :model-value="item.qty"
+                :min="0"
+                :max="5"
+                @change="delta => cartStore.updateQty(item.id, delta)"
+              />
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </main>
 
     <footer
-      v-if="cart.length > 0"
-      class="fixed-footer pa-4 rounded-t-xl shadow-top"
+      v-if="cartStore.items.length > 0"
+      class="border-t border-charcoal/[0.06] bg-white px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-sheet"
     >
-      <div class="d-flex justify-space-between align-end mb-4 px-2">
+      <div class="mb-4 flex items-end justify-between">
         <div>
-          <span class="text-caption text-medium-emphasis d-block">
-            {{ t('common.total') }}
-          </span>
-          <span class="font-weight-black text-h5 text-primary">
-            {{ formatCurrency(total) }}
-          </span>
+          <div class="text-xs text-charcoal/40">{{ t('common.total') }}</div>
+          <div class="text-xl font-extrabold text-olive">{{ formatCurrency(cartStore.cartTotal) }}</div>
         </div>
         <div class="text-right">
-          <span class="text-caption text-medium-emphasis d-block">
-            {{ totalItems }} {{ t('common.items') }}
-          </span>
-          <span class="text-subtitle-2 font-weight-black">
+          <div class="text-xs text-charcoal/40">{{ cartStore.totalItems }} {{ t('common.items') }}</div>
+          <div v-if="tableNumber" class="text-sm font-bold text-charcoal">
             {{ t('common.table') }} {{ tableNumber }}
-          </span>
+          </div>
         </div>
       </div>
 
-      <v-btn
-        block
-        color="primary"
-        size="large"
-        rounded="pill"
-        class="elevation-1 checkout-btn"
-        :loading="loading"
-        @click="$emit('submit')"
-      >
+      <BaseButton full-width size="lg" :loading="loading" @click="$emit('submit')">
         {{ t('btn.placeOrder') }}
-        <v-icon end class="ml-2">mdi-chevron-right</v-icon>
-      </v-btn>
+        <template #icon-right><ChevronRight :size="18" /></template>
+      </BaseButton>
     </footer>
 
-    <v-bottom-sheet v-model="noteDialog" :close-on-content-click="false">
-      <v-sheet rounded="t-xl" class="pb-safe">
-        <!-- Handle -->
-        <div class="d-flex justify-center pt-3 pb-1">
-          <div class="bs-handle" />
-        </div>
+    <BaseBottomSheet v-model="noteSheetOpen">
+      <div class="px-5 pb-2">
+        <h2 class="text-lg font-bold text-charcoal">{{ t('common.noteFor') }}</h2>
+        <p class="mb-4 text-sm text-charcoal/50">{{ selectedItem?.name }}</p>
 
-        <!-- Item context -->
-        <v-card-title class="font-weight-black pt-2">
-          {{ t('common.noteFor') }}
-          <div class="text-caption text-grey-darken-1 mt-1">
-            {{ selectedItem?.name }}
-          </div>
-        </v-card-title>
+        <textarea
+          v-model="noteDraft"
+          rows="3"
+          maxlength="100"
+          :placeholder="t('common.notePlaceholder')"
+          class="mb-3 w-full resize-none rounded-card border border-charcoal/10 bg-ivory/60 p-3 text-sm text-charcoal outline-none focus:border-olive"
+        />
 
-        <v-divider />
-
-        <!-- Textarea -->
-        <div class="px-5 pt-4 pb-3">
-          <v-textarea
-            v-model="noteValue"
-            placeholder="e.g. No spicy, less salt, extra sauce..."
-            variant="outlined"
-            color="#2D7A6E"
-            rounded="xl"
-            rows="3"
-            maxlength="100"
-            counter="100"
-            hide-details="auto"
-            auto-grow
-          />
-
-          <!-- Quick suggestion chips -->
-          <div class="d-flex flex-wrap gap-2">
-            <v-chip
-              v-for="suggestion in noteSuggestions"
-              :key="suggestion.key"
-              size="small"
-              variant="tonal"
-              color="primary"
-              class="me-1"
-              @click="noteValue = suggestion.label"
-            >
-              {{ suggestion.label }}
-            </v-chip>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="d-flex gap-3 px-5 pb-6">
-          <v-btn
-            variant="tonal"
-            color="grey"
-            rounded="pill"
-            class="flex-grow-1"
-            height="46"
-            @click="cancelNote"
+        <div class="mb-6 flex flex-wrap gap-2">
+          <button
+            v-for="suggestion in noteSuggestions"
+            :key="suggestion.key"
+            type="button"
+            class="rounded-pill bg-olive/10 px-3 py-1 text-xs font-semibold text-olive-dark"
+            @click="noteDraft = suggestion.label"
           >
+            {{ suggestion.label }}
+          </button>
+        </div>
+
+        <div class="flex gap-3">
+          <BaseButton variant="secondary" full-width @click="noteSheetOpen = false">
             {{ t('btn.cancel') }}
-          </v-btn>
-          <v-btn
-            color="#2D7A6E"
-            variant="flat"
-            rounded="pill"
-            class="flex-grow-1"
-            height="46"
-            @click="saveNote"
-          >
-            <v-icon start size="16">mdi-check</v-icon>
-            {{ t('btn.save') }}
-          </v-btn>
+          </BaseButton>
+          <BaseButton full-width @click="saveNote">{{ t('btn.save') }}</BaseButton>
         </div>
-      </v-sheet>
-    </v-bottom-sheet>
+      </div>
+    </BaseBottomSheet>
   </div>
 </template>
-
-<style scoped>
-  .close-bar {
-    width: 40px;
-    height: 5px;
-  }
-  .cart-page-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-    overflow: hidden;
-    background-color: #f8f9fa;
-  }
-
-  .scroll-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-bottom: 150px !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Improved Stepper Styling */
-  .stepper-box {
-    display: flex;
-    align-items: center;
-    background: #f5f5f5;
-    padding: 3px;
-    border-radius: 50px;
-  }
-
-  .qty-display {
-    min-width: 30px;
-    text-align: center;
-    font-weight: 800;
-    font-size: 0.95rem;
-  }
-
-  .line-height-tight {
-    line-height: 1.2;
-  }
-
-  .fixed-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    z-index: 1000;
-    padding-bottom: calc(env(safe-area-inset-bottom) + 16px) !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-  }
-
-  .shadow-top {
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05) !important;
-  }
-
-  .checkout-btn {
-    transition: transform 0.1s;
-  }
-
-  .checkout-btn:active {
-    transform: scale(0.97);
-  }
-
-  .cart-card {
-    background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-  }
-
-  .action-btn {
-    background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-    border-radius: 12px !important;
-  }
-</style>

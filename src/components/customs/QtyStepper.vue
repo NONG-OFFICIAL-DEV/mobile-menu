@@ -1,120 +1,70 @@
-<template>
-  <div :class="['qty-stepper', { 'is-small': small }]">
-    <v-btn
-      icon="mdi-minus"
-      variant="flat"
-      :size="small ? 24 : 32"
-      :class="['stepper-btn', { disabled: modelValue <= min }]"
-      @click="updateQty(-1)"
-    />
+<script setup lang="ts">
+  import { Minus, Plus } from 'lucide-vue-next'
+  import { useI18n } from 'vue-i18n'
 
-    <span class="qty-display">{{ modelValue }}</span>
+  const { t } = useI18n()
 
-    <v-btn
-      icon="mdi-plus"
-      variant="flat"
-      color="primary"
-      :size="small ? 24 : 32"
-      :class="['elevation-1', { 'is-disabled': strict && modelValue >= max }]"
-      @click="updateQty(1)"
-    />
-  </div>
-</template>
+  const props = withDefaults(
+    defineProps<{
+      modelValue: number
+      min?: number
+      max?: number
+      small?: boolean
+      strict?: boolean
+    }>(),
+    { min: 1, max: 5, small: false, strict: false }
+  )
 
-<script setup>
-  const props = defineProps({
-    modelValue: {
-      type: Number,
-      required: true
-    },
-    min: {
-      type: Number,
-      default: 1
-    },
-    max: {
-      type: Number,
-      default: 5
-    },
-    small: {
-      type: Boolean,
-      default: false
-    },
-    strict: { type: Boolean, default: false }
-  })
+  const emit = defineEmits<{
+    'update:modelValue': [value: number]
+    change: [delta: number]
+  }>()
 
-  const emit = defineEmits(['update:modelValue', 'change'])
-
-  const updateQty = delta => {
+  function updateQty(delta: number) {
     const newValue = props.modelValue + delta
 
-    // --- INCREASE LOGIC ---
-    if (delta > 0) {
-      if (newValue > props.max) {
-        // If strict, we do nothing. If not strict, we emit change so parent can alert.
-        if (!props.strict) emit('change', delta)
-        return
-      }
+    if (delta > 0 && newValue > props.max) {
+      if (!props.strict) emit('change', delta)
+      return
     }
+    if (delta < 0 && newValue < props.min) return
 
-    // --- DECREASE LOGIC ---
-    if (delta < 0 && newValue < props.min) {
-      return // Usually we don't alert for "less than min", just stop.
-    }
-
-    // Standard Update
     emit('update:modelValue', newValue)
     emit('change', delta)
   }
 </script>
 
-<style scoped>
-  .qty-stepper {
-    display: flex;
-    align-items: center;
-    background: #f5f5f5; /* Light grey pill background */
-    padding: 4px;
-    border-radius: 50px;
-    width: fit-content;
-    border: 1px solid rgba(0, 0, 0, 0.03);
-  }
+<template>
+  <div
+    class="inline-flex items-center gap-1 rounded-pill border border-charcoal/[0.06] bg-charcoal/[0.04] p-1"
+  >
+    <button
+      type="button"
+      :disabled="modelValue <= min"
+      :class="small ? 'h-6 w-6' : 'h-8 w-8'"
+      class="inline-flex items-center justify-center rounded-full bg-white text-charcoal shadow-soft transition-transform active:scale-90 disabled:opacity-40"
+      :aria-label="t('common.decreaseQty')"
+      @click="updateQty(-1)"
+    >
+      <Minus :size="small ? 12 : 14" />
+    </button>
 
-  .qty-display {
-    min-width: 32px;
-    text-align: center;
-    font-weight: 800;
-    font-size: 0.95rem;
-    color: #2c3e50;
-    user-select: none;
-  }
+    <span
+      class="select-none text-center font-bold text-charcoal"
+      :class="small ? 'min-w-6 text-xs' : 'min-w-8 text-sm'"
+    >
+      {{ modelValue }}
+    </span>
 
-  .stepper-btn {
-    background: white !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
-    transition: transform 0.1s active;
-  }
-
-  .stepper-btn:active {
-    transform: scale(0.9);
-  }
-
-  /* Small Variant Styles */
-  .is-small {
-    padding: 2px;
-  }
-  .is-small .qty-display {
-    min-width: 24px;
-    font-size: 0.8rem;
-  }
-
-  .disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-  .v-btn--disabled {
-    opacity: 0.4;
-  }
-  .is-disabled {
-    opacity: 0.4;
-    pointer-events: none;
-  }
-</style>
+    <button
+      type="button"
+      :disabled="strict && modelValue >= max"
+      :class="small ? 'h-6 w-6' : 'h-8 w-8'"
+      class="inline-flex items-center justify-center rounded-full bg-olive text-white shadow-soft transition-transform active:scale-90 disabled:opacity-40"
+      :aria-label="t('common.increaseQty')"
+      @click="updateQty(1)"
+    >
+      <Plus :size="small ? 12 : 14" />
+    </button>
+  </div>
+</template>

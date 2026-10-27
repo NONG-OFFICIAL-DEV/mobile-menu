@@ -1,111 +1,54 @@
-<template>
-  <header class="app-header-wrapper">
-    <div class="status-bar-safe"></div>
+<script setup lang="ts">
+  import { ChevronLeft } from 'lucide-vue-next'
+  import { useI18n } from 'vue-i18n'
 
-    <div class="header-content d-flex align-center px-4 py-2">
-      <div class="header-left">
-        <v-btn
+  const { t } = useI18n()
+
+  withDefaults(
+    defineProps<{
+      title?: string
+      subtitle?: string
+      showBack?: boolean
+      live?: boolean
+    }>(),
+    { showBack: true, live: false }
+  )
+
+  defineEmits<{ back: [] }>()
+</script>
+
+<template>
+  <header class="sticky top-0 z-20 border-b border-charcoal/[0.06] bg-white/90 backdrop-blur-md">
+    <div class="pt-[env(safe-area-inset-top)]" />
+    <div class="flex items-center px-4 py-3">
+      <div class="flex w-12 items-center">
+        <button
           v-if="showBack && !$slots.left"
-          icon="mdi-chevron-left"
-          variant="flat"
-          size="32"
-          class="action-btn"
+          type="button"
+          class="inline-flex h-8 w-8 items-center justify-center rounded-card border border-charcoal/10 bg-white shadow-soft"
+          :aria-label="t('btn.back')"
           @click="$emit('back')"
-        />
-        <slot name="left"></slot>
+        >
+          <ChevronLeft :size="18" class="text-charcoal" />
+        </button>
+        <slot name="left" />
       </div>
 
-      <div class="header-center flex-grow-1 text-center">
-        <div class="text-subtitle-1 font-weight-black">{{ title }}</div>
-
-        <div v-if="subtitle || $slots.subtitle" class="header-subtitle">
+      <div class="flex-1 text-center">
+        <div class="text-[15px] font-extrabold text-charcoal">{{ title }}</div>
+        <div v-if="subtitle || $slots.subtitle" class="mt-0.5">
           <slot name="subtitle">
-            <div class="d-flex align-center justify-center ga-1">
-              <span v-if="live" class="live-dot"></span>
-              <span class="text-caption text-grey mt-n1">{{ subtitle }}</span>
+            <div class="flex items-center justify-center gap-1.5">
+              <span v-if="live" class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+              <span class="text-xs text-charcoal/40">{{ subtitle }}</span>
             </div>
           </slot>
         </div>
       </div>
 
-      <div class="header-right d-flex justify-end">
-        <slot name="right">
-          <div style="width: 32px" v-if="showBack && !$slots.left"></div>
-        </slot>
+      <div class="flex w-12 justify-end">
+        <slot name="right" />
       </div>
     </div>
   </header>
 </template>
-
-<script setup>
-  defineProps({
-    title: String,
-    subtitle: String,
-    showBack: { type: Boolean, default: true },
-    live: { type: Boolean, default: false }
-  })
-  defineEmits(['back'])
-</script>
-
-<style scoped>
-  .app-header-wrapper {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    /* Glassmorphism effect */
-    background: white;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  }
-
-  .status-bar-safe {
-    height: env(safe-area-inset-top);
-    background: transparent;
-  }
-
-  .header-left,
-  .header-right {
-    width: 48px; /* Fixed width side containers ensure center stays center */
-    display: flex;
-    align-items: center;
-  }
-
-  .header-subtitle {
-    margin-top: 2px;
-  }
-
-  /* Action Button Style */
-  .action-btn {
-    background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-    border-radius: 12px !important;
-  }
-
-  /* Live Indicator */
-  .live-dot {
-    width: 6px;
-    height: 6px;
-    background-color: #4caf50;
-    border-radius: 50%;
-    box-shadow: 0 0 0 rgba(76, 175, 80, 0.4);
-    animation: pulse 2s infinite;
-    margin-bottom: 4px;
-  }
-
-  @keyframes pulse {
-    0% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-    }
-    70% {
-      transform: scale(1);
-      box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
-    }
-    100% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-    }
-  }
-</style>

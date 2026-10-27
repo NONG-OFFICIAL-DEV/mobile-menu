@@ -1,132 +1,54 @@
-<template>
-  <div>
-    <v-snackbar
-      v-for="alert in alerts"
-      :key="alert.id"
-      v-model="alert.visible"
-      :timeout="alert.timeout || defaultTimeout"
-      location="bottom"
-      rounded="pill"
-      elevation="0"
-      class="snackbar-item"
-      @update:model-value="val => !val && closeAlert(alert.id)"
-    >
-      <!-- Content -->
-      <div class="d-flex align-center gap-2">
-        <v-icon size="17" :color="iconColor(alert.type)">
-          {{ alert.icon || iconName(alert.type) }}
-        </v-icon>
-        <span class="snack-message capitalize-first-letter">
-          {{ alert.message }}
-        </span>
-      </div>
+<script setup lang="ts">
+  import { AnimatePresence, motion } from 'motion-v'
+  import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-vue-next'
+  import { useI18n } from 'vue-i18n'
+  import { useUiStore } from '@/stores/uiStore'
+  import type { ToastType } from '@/stores/uiStore'
 
-      <!-- Close action -->
-      <template v-if="alert.dismissible" #actions>
-        <v-btn
-          icon
-          size="x-small"
-          variant="text"
-          color="rgba(255,255,255,0.6)"
-          @click="closeAlert(alert.id)"
-        >
-          <v-icon size="16">mdi-close</v-icon>
-        </v-btn>
-      </template>
-    </v-snackbar>
-  </div>
-</template>
+  const { t } = useI18n()
+  const ui = useUiStore()
 
-<script>
-  export default {
-    name: 'NotificationAlert',
-    props: {
-      outlined:        { type: Boolean, default: true },
-      text:            { type: Boolean, default: false },
-      dense:           { type: Boolean, default: false },
-      prominent:       { type: Boolean, default: false },
-      dismissible:     { type: Boolean, default: false },
-      defaultTimeout:  { type: Number,  default: 3000 },
-      defaultMaxAlert: { type: Number,  default: 4 },
-    },
-    data() {
-      return {
-        alerts: [],
-      }
-    },
-    methods: {
-      newAlert(
-        message,
-        {
-          type        = 'success',
-          icon        = null,
-          timeout     = this.defaultTimeout,
-          dense       = this.dense,
-          prominent   = this.prominent,
-          dismissible = this.dismissible,
-        } = {}
-      ) {
-        if (this.alerts.length >= this.defaultMaxAlert) this.alerts.shift()
+  const icons: Record<ToastType, unknown> = {
+    success: CheckCircle2,
+    error: XCircle,
+    warning: AlertTriangle,
+    info: Info
+  }
 
-        const id = new Date().valueOf() + Math.random()
-        this.alerts.push({ id, type, icon, message, dense, prominent, dismissible, timeout, visible: true })
-
-        if (timeout) {
-          setTimeout(() => this.closeAlert(id), timeout)
-        }
-      },
-
-      closeAlert(id) {
-        this.alerts = this.alerts.filter(el => el.id !== id)
-      },
-
-      iconName(type) {
-        return {
-          success: 'mdi-check-circle-outline',
-          error:   'mdi-close-circle-outline',
-          warning: 'mdi-alert-outline',
-          info:    'mdi-information-outline',
-        }[type] || 'mdi-information-outline'
-      },
-
-      iconColor(type) {
-        return {
-          success: '#4ADE80',
-          error:   '#FF8A80',
-          warning: '#FFD54F',
-          info:    '#90CAF9',
-        }[type] || '#4ADE80'
-      },
-    },
+  const iconClasses: Record<ToastType, string> = {
+    success: 'text-emerald-400',
+    error: 'text-red-400',
+    warning: 'text-amber-400',
+    info: 'text-sky-400'
   }
 </script>
 
-<style scoped>
-  .snack-message {
-    font-size: 13px;
-    font-weight: 600;
-    color: #ffffff;
-    letter-spacing: 0.1px;
-  }
-
-  .gap-2 { gap: 8px; }
-</style>
-
-<style>
-  /* unscoped — targets Vuetify's internal snackbar wrapper */
-  .snackbar-item .v-snackbar__wrapper {
-    background: #1C1C1E !important;
-    min-width: 0 !important;
-    max-width: calc(100vw - 32px) !important;
-    padding: 10px 16px !important;
-  }
-
-  .snackbar-item .v-snackbar__content {
-    padding: 0 !important;
-  }
-
-  .snackbar-item .v-snackbar__actions {
-    padding: 0 !important;
-    margin-left: 8px !important;
-  }
-</style>
+<template>
+  <Teleport to="body">
+    <div class="pointer-events-none fixed inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[60] flex flex-col items-center gap-2 px-4">
+      <AnimatePresence>
+        <motion.div
+          v-for="toast in ui.toasts"
+          :key="toast.id"
+          class="pointer-events-auto flex max-w-full items-center gap-2 rounded-pill bg-charcoal px-4 py-2.5 text-white shadow-sheet"
+          :initial="{ opacity: 0, y: 12, scale: 0.95 }"
+          :animate="{ opacity: 1, y: 0, scale: 1 }"
+          :exit="{ opacity: 0, scale: 0.95 }"
+          :transition="{ duration: 0.2 }"
+        >
+          <component :is="icons[toast.type]" :size="17" :class="iconClasses[toast.type]" aria-hidden="true" />
+          <span class="text-[13px] font-semibold">{{ toast.message }}</span>
+          <button
+            v-if="toast.dismissible"
+            type="button"
+            class="ml-1 text-white/60 hover:text-white"
+            :aria-label="t('common.dismiss')"
+            @click="ui.dismissToast(toast.id)"
+          >
+            <X :size="15" />
+          </button>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  </Teleport>
+</template>

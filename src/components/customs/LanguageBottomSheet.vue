@@ -1,116 +1,82 @@
-<script setup>
-  import { ref, computed, onMounted, getCurrentInstance } from 'vue'
+<script setup lang="ts">
+  import { ref, computed, onMounted } from 'vue'
   import { useI18n } from 'vue-i18n'
+  import { Check } from 'lucide-vue-next'
+  import BaseBottomSheet from '@/components/ui/BaseBottomSheet.vue'
 
-  const props = defineProps({
-    stackedBtn: { type: Boolean, default: true },
-    iconBtn: { type: Boolean, default: true }
-  })
-
-  const { locale, t } = useI18n()
-  const { proxy } = getCurrentInstance()
-
-  // Reactive for bottom sheet (if you want to use it later)
-  const langSheet = ref(false)
-
-  // Language list
-  const languages = computed(() => [
-    {
-      lang: 'km',
-      imgSrc: 'https://flagcdn.com/w80/kh.png',
-      alt: 'Khmer Flag',
-      label: t('lang.km')
-    },
-    {
-      lang: 'en',
-      imgSrc: 'https://flagcdn.com/w80/gb.png',
-      alt: 'English Flag',
-      label: t('lang.en')
-    }
-  ])
-
-  // Current language flag image
-  const currentLanguageImage = computed(() =>
-    locale.value === 'en'
-      ? 'https://flagcdn.com/w80/gb.png'
-      : 'https://flagcdn.com/w80/kh.png'
+  withDefaults(
+    defineProps<{
+      stackedBtn?: boolean
+      iconBtn?: boolean
+    }>(),
+    { stackedBtn: true, iconBtn: true }
   )
 
-  // Switch language
-  const switchLanguage = lang => {
-    langSheet.value = false
+  const { locale, t } = useI18n()
+
+  const sheetOpen = ref(false)
+
+  const languages = computed(() => [
+    { lang: 'km', imgSrc: 'https://flagcdn.com/w80/kh.png', alt: 'Khmer flag', label: t('lang.km') },
+    { lang: 'en', imgSrc: 'https://flagcdn.com/w80/gb.png', alt: 'English flag', label: t('lang.en') }
+  ])
+
+  const currentLanguageImage = computed(() =>
+    locale.value === 'en' ? 'https://flagcdn.com/w80/gb.png' : 'https://flagcdn.com/w80/kh.png'
+  )
+
+  function switchLanguage(lang: string) {
+    sheetOpen.value = false
     locale.value = lang
     localStorage.setItem('lang', lang)
-    // If using Vuetify locale
-    if (proxy?.$vuetify?.locale) {
-      proxy.$vuetify.locale.current = lang
-    }
   }
 
   onMounted(() => {
     const savedLang = localStorage.getItem('lang')
-    if (savedLang) {
-      locale.value = savedLang
-      if (proxy?.$vuetify?.locale) {
-        proxy.$vuetify.locale.current = savedLang
-      }
-    }
+    if (savedLang) locale.value = savedLang
   })
 </script>
 
 <template>
-  <v-btn
+  <button
     v-if="iconBtn"
-    icon
-    size="small"
-    variant="flat"
-    class="swicher-btn"
-    @click="langSheet = true"
+    type="button"
+    class="inline-flex h-9 w-9 items-center justify-center rounded-card border border-charcoal/10 bg-white shadow-soft transition-transform active:scale-90"
     :title="locale"
+    :aria-label="t('common.selectLanguage')"
+    @click="sheetOpen = true"
   >
-    <v-avatar size="24">
-      <v-img :src="currentLanguageImage" />
-    </v-avatar>
-  </v-btn>
+    <img :src="currentLanguageImage" alt="" class="h-6 w-6 rounded-full object-cover" />
+  </button>
 
-  <v-btn v-if="stackedBtn" class="px-3 rounded-pill" @click="langSheet = true">
-    <v-avatar size="24" class="mr-2">
-      <v-img :src="currentLanguageImage" />
-    </v-avatar>
-    <span>{{ locale.toUpperCase() }}</span>
-  </v-btn>
+  <button
+    v-if="stackedBtn"
+    type="button"
+    class="inline-flex items-center gap-2 rounded-pill border border-charcoal/10 bg-white px-3 py-1.5"
+    :aria-label="t('common.selectLanguage')"
+    @click="sheetOpen = true"
+  >
+    <img :src="currentLanguageImage" alt="" class="h-6 w-6 rounded-full object-cover" />
+    <span class="text-sm font-semibold uppercase">{{ locale }}</span>
+  </button>
 
-  <!-- Optional Bottom Sheet / Dropdown -->
-  <v-bottom-sheet v-model="langSheet">
-    <v-card class="pa-4 rounded-t-xl">
-      <div class="text-h6 mb-4">{{ t('common.selectLanguage') }}</div>
-      <v-list>
-        <v-list-item
-          v-for="lang in languages"
-          :key="lang.lang"
-          @click="switchLanguage(lang.lang)"
-          :active="locale === lang.lang"
-          class="rounded-pill mb-2 border"
-        >
-          <template #prepend>
-            <v-avatar size="28">
-              <v-img :src="lang.imgSrc" />
-            </v-avatar>
-          </template>
-          <v-list-item-title class="ml-2">{{ lang.label }}</v-list-item-title>
-          <template #append v-if="locale === lang.lang">
-            <v-icon color="primary">mdi-check-circle</v-icon>
-          </template>
-        </v-list-item>
-      </v-list>
-    </v-card>
-  </v-bottom-sheet>
+  <BaseBottomSheet v-model="sheetOpen">
+    <div class="px-5 pb-2">
+      <h2 class="mb-4 text-lg font-bold text-charcoal">{{ t('common.selectLanguage') }}</h2>
+      <ul class="flex flex-col gap-2">
+        <li v-for="item in languages" :key="item.lang">
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 rounded-pill border px-4 py-3 text-left transition-colors"
+            :class="locale === item.lang ? 'border-olive bg-olive/5' : 'border-charcoal/10'"
+            @click="switchLanguage(item.lang)"
+          >
+            <img :src="item.imgSrc" :alt="item.alt" class="h-7 w-7 rounded-full object-cover" />
+            <span class="flex-1 font-semibold text-charcoal">{{ item.label }}</span>
+            <Check v-if="locale === item.lang" :size="18" class="text-olive" />
+          </button>
+        </li>
+      </ul>
+    </div>
+  </BaseBottomSheet>
 </template>
-<style scoped>
-  .swicher-btn {
-    border-radius: 14px;
-    background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  }
-</style>

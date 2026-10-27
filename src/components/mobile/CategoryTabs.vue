@@ -1,112 +1,110 @@
-<script setup>
+<script setup lang="ts">
+  import { Search, X } from 'lucide-vue-next'
+  import { motion } from 'motion-v'
   import { useI18n } from 'vue-i18n'
+
+  interface Category {
+    id: number | string
+    name: string
+  }
+
+  defineProps<{
+    categories: Category[]
+    modelValue: number | string
+    search: string
+    isLoading?: boolean
+  }>()
+
+  defineEmits<{
+    'update:modelValue': [value: number | string]
+    'update:search': [value: string]
+  }>()
+
   const { t } = useI18n()
-
-  defineProps({
-    categories: Array,
-    modelValue: null,
-    search: String,
-    isLoading: Boolean
-  })
-
-  defineEmits(['update:modelValue', 'update:search'])
 </script>
 
 <template>
-  <!-- Sticky Wrapper -->
-  <div class="sticky-bar">
+  <div class="bg-ivory/90 backdrop-blur-sm">
     <!-- Search -->
-    <div class="py-3 px-4">
-      <v-text-field
-        :model-value="search"
-        @update:model-value="$emit('update:search', $event)"
-        :placeholder="t('common.search')"
-        prepend-inner-icon="mdi-magnify"
-        flat
-        rounded="pill"
-        density="compact"
-        hide-details
-        class="search-bar"
-      />
+    <div class="px-4 pt-3 pb-2">
+      <div class="relative">
+        <Search
+          :size="18"
+          class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal/40"
+          aria-hidden="true"
+        />
+        <input
+          :value="search"
+          type="search"
+          :placeholder="t('common.search')"
+          class="h-11 w-full rounded-pill border border-charcoal/10 bg-white pl-10 pr-10 text-[15px] text-charcoal placeholder:text-charcoal/40 outline-none transition-colors focus:border-olive"
+          @input="$emit('update:search', ($event.target as HTMLInputElement).value)"
+        />
+        <button
+          v-if="search"
+          type="button"
+          :aria-label="t('common.clearSearch')"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/40 hover:text-charcoal"
+          @click="$emit('update:search', '')"
+        >
+          <X :size="16" />
+        </button>
+      </div>
     </div>
 
     <!-- Categories -->
-    <div class="category-wrapper py-0 px-4 d-flex no-wrap overflow-x-auto">
-      <v-slide-group
-        :model-value="modelValue"
-        @update:model-value="$emit('update:modelValue', $event)"
-        :show-arrows="false"
-        mandatory
-      >
-        <v-slide-group-item v-slot="{ isSelected, select }" value="All">
-          <v-btn
-            :color="isSelected ? 'primary' : 'white'"
-            :class="isSelected ? 'text-white' : 'text-grey-darken-1 border'"
-            rounded="pill"
-            flat
-            class="ma-2 text-none font-weight-bold"
-            size="small"
-            @click="select"
-          >
-            {{ t('common.all') }}
-          </v-btn>
-        </v-slide-group-item>
-        <v-slide-group-item
-          v-for="cat in categories"
-          :key="cat"
-          :value="cat.id"
-          v-slot="{ isSelected, select }"
+    <div class="scrollbar-none flex gap-2 overflow-x-auto px-4 pb-3">
+      <template v-if="isLoading">
+        <div
+          v-for="n in 5"
+          :key="n"
+          class="h-9 w-20 shrink-0 animate-pulse rounded-pill bg-charcoal/10"
+        />
+      </template>
+
+      <template v-else>
+        <button
+          type="button"
+          class="relative shrink-0 rounded-pill px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors"
+          :class="modelValue === 'All' ? 'text-white' : 'text-charcoal/70 border border-charcoal/10 hover:border-olive/40'"
+          @click="$emit('update:modelValue', 'All')"
         >
-          <v-btn
-            :color="isSelected ? 'primary' : 'white'"
-            :class="isSelected ? 'text-white' : 'text-grey-darken-1 border'"
-            rounded="pill"
-            flat
-            class="ma-2 text-none font-weight-bold"
-            size="small"
-            @click="select"
-          >
-            {{ cat.name }}
-          </v-btn>
-        </v-slide-group-item>
-        <v-slide-group-item v-for="(item, n) in 12" :key="n" :value="n">
-          <v-skeleton-loader
-            v-if="isLoading"
-            width="100"
-            class="px-0 rounded-pill"
-            type="list-item"
-          ></v-skeleton-loader>
-        </v-slide-group-item>
-      </v-slide-group>
+          <motion.div
+            v-if="modelValue === 'All'"
+            layout-id="category-pill"
+            class="absolute inset-0 rounded-pill bg-olive"
+            :transition="{ type: 'spring', stiffness: 450, damping: 32 }"
+          />
+          <span class="relative">{{ t('common.all') }}</span>
+        </button>
+
+        <button
+          v-for="cat in categories"
+          :key="cat.id"
+          type="button"
+          class="relative shrink-0 rounded-pill px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors"
+          :class="modelValue === cat.id ? 'text-white' : 'text-charcoal/70 border border-charcoal/10 hover:border-olive/40'"
+          @click="$emit('update:modelValue', cat.id)"
+        >
+          <motion.div
+            v-if="modelValue === cat.id"
+            layout-id="category-pill"
+            class="absolute inset-0 rounded-pill bg-olive"
+            :transition="{ type: 'spring', stiffness: 450, damping: 32 }"
+          />
+          <span class="relative">{{ cat.name }}</span>
+        </button>
+      </template>
     </div>
   </div>
 </template>
 
 <style scoped>
-  /* Sticky behavior */
-  .sticky-bar {
-    position: sticky;
-    top: 64px; /* height of AppHeader */
-    z-index: 10;
-    background: white;
-  }
-
-  /* Search input */
-  .search-bar :deep(.v-field__input) {
-    font-size: 0.9rem;
-  }
-
-  /* Hide horizontal scrollbar */
-  .category-wrapper {
-    -ms-overflow-style: none;
+  .scrollbar-none {
     scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  .category-wrapper::-webkit-scrollbar {
+  .scrollbar-none::-webkit-scrollbar {
     display: none;
-  }
-
-  /* Button border */
-  .border {
-    border: 1px solid #e0e0e0 !important;
   }
 </style>

@@ -1,6 +1,8 @@
 <script setup>
   import { onMounted, ref } from 'vue'
   import { useI18n } from 'vue-i18n'
+  import { History, UtensilsCrossed } from 'lucide-vue-next'
+  import BaseButton from '@/components/ui/BaseButton.vue'
 
   const { t } = useI18n()
   defineEmits(['back', 'reset', 'view-history'])
@@ -17,14 +19,14 @@
 </script>
 
 <template>
-  <div class="success-page d-flex flex-column align-center">
+  <div class="success-page flex flex-col items-center">
     <!-- ── CONFETTI DOTS ── -->
     <div class="confetti-wrap" aria-hidden="true">
       <span v-for="n in 18" :key="n" class="dot" :class="`dot-${n}`" />
     </div>
 
     <!-- ── MAIN CONTENT ── -->
-    <div class="content d-flex flex-column align-center px-6 text-center">
+    <div class="content flex flex-col items-center px-6 text-center">
       <!-- Check circle -->
       <div class="check-ring" :class="{ show: visible }">
         <div class="check-inner">
@@ -36,10 +38,8 @@
       </div>
 
       <!-- Text -->
-      <h1 class="text-h5 font-weight-bold mb-2">
-        {{ t('message.confirmed') }}
-      </h1>
-      <p class="text-body-1 text-medium-emphasis mb-6">
+      <h1 class="mb-2 text-xl font-bold text-charcoal">{{ t('message.confirmed') }}</h1>
+      <p class="mb-6 text-sm text-charcoal/50">
         {{ t('message.wating') }}
         <br />
         {{ t('message.ready') }}
@@ -47,29 +47,16 @@
     </div>
 
     <!-- ── ACTIONS ── -->
-    <div class="actions-bar px-6 pb-10 d-flex flex-column gap-3 w-100">
-      <v-btn
-        block
-        size="large"
-        rounded="xl"
-        class="primary-btn"
-        prepend-icon="mdi-history"
-        @click="$emit('view-history')"
-      >
+    <div class="actions-bar flex w-full flex-col gap-3 px-6 pb-10">
+      <BaseButton size="lg" full-width @click="$emit('view-history')">
+        <template #icon-left><History :size="18" /></template>
         {{ t('btn.viewHistory') }}
-      </v-btn>
+      </BaseButton>
 
-      <v-btn
-        block
-        size="large"
-        rounded="xl"
-        variant="tonal"
-        color="#2D7A6E"
-        prepend-icon="mdi-silverware-fork-knife"
-        @click="$emit('reset')"
-      >
+      <BaseButton variant="secondary" size="lg" full-width @click="$emit('reset')">
+        <template #icon-left><UtensilsCrossed :size="18" /></template>
         {{ t('btn.orderMore') }}
-      </v-btn>
+      </BaseButton>
     </div>
   </div>
 </template>
@@ -432,13 +419,4 @@
     gap: 12px;
   }
 
-  .primary-btn {
-    background: #1c1c1e !important;
-    color: #ffffff !important;
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0 !important;
-    height: 54px !important;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16) !important;
-  }
 </style>

@@ -1,50 +1,33 @@
-<script setup>
+<script setup lang="ts">
+  import { ChevronRight } from 'lucide-vue-next'
+  import { motion } from 'motion-v'
   import { formatCurrency } from '@nong-official-dev/core'
   import { useI18n } from 'vue-i18n'
 
   const { t } = useI18n()
-  defineProps({
-    totalItems: Number,
-    totalPrice: Number
-  })
-  defineEmits(['open'])
+
+  defineProps<{
+    totalItems: number
+    totalPrice: number
+  }>()
+
+  defineEmits<{ open: [] }>()
 </script>
 
 <template>
-  <div class="cart-anchor px-4">
-    <v-btn
-      block
-      size="large"
-      color="primary"
-      rounded="pill"
-      class="shadow-top"
-      elevation="8"
+  <div class="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <motion.button
+      type="button"
+      class="flex w-full items-center gap-3 rounded-pill bg-olive px-5 py-3.5 text-white shadow-[0_10px_30px_rgba(104,118,83,0.4)]"
+      :while-press="{ scale: 0.97 }"
       @click="$emit('open')"
-      append-icon="mdi-chevron-right"
     >
-      <v-avatar color="white" size="28" class="mr-3">
-        <span class="text-caption font-weight-bold">
-          {{ totalItems }}
-        </span>
-      </v-avatar>
-      {{t('btn.yourOrder')}}
-      <v-spacer />
-      <span class="ms-4">
-        {{ formatCurrency(totalPrice) }}
+      <span class="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-sm font-bold">
+        {{ totalItems }}
       </span>
-    </v-btn>
+      <span class="font-semibold">{{ t('btn.yourOrder') }}</span>
+      <span class="ml-auto font-bold">{{ formatCurrency(totalPrice) }}</span>
+      <ChevronRight :size="18" />
+    </motion.button>
   </div>
 </template>
-
-<style scoped>
-  .cart-anchor {
-    position: fixed;
-    bottom: 24px; /* Native feel */
-    left: 0;
-    right: 0;
-    z-index: 999;
-  }
-  .shadow-top {
-    box-shadow: 0 10px 30px rgba(59, 130, 142, 0.4) !important;
-  }
-</style>

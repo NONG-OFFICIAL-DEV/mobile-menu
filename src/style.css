@@ -1,39 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Design tokens ─────────────────────────────────────────────── */
+  --color-ivory: #f8f5ef;
+  --color-surface: #ffffff;
+  --color-charcoal: #292720;
+  --color-olive: #687653;
+  --color-olive-dark: #525e42;
+  --color-olive-light: #8a9777;
+
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 14px;
+  --radius-sheet: 20px;
+  --radius-pill: 999px;
+
+  --shadow-soft: 0 2px 10px rgba(41, 39, 32, 0.06);
+  --shadow-sheet: 0 -8px 24px rgba(41, 39, 32, 0.08);
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color-scheme: light;
+  color: var(--color-charcoal);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-ivory);
+}
+
 html,
 body {
   touch-action: manipulation;
-}
-
-/* Typography override */
-.text-h1,
-.text-h2,
-.text-h3,
-.text-h4,
-.text-h5,
-.text-h6,
-.text-subtitle-1,
-.text-subtitle-2,
-.text-body-1,
-.text-body-2,
-.text-button,
-.text-caption,
-.text-overline {
-  font-family: "Poppins", sans-serif;
-}
-
-.v-field input,
-.v-field textarea {
-  font-size: 16px !important;
 }
