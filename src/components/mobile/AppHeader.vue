@@ -10,7 +10,7 @@
 
   defineProps<{
     tableNumber?: number | string | null
-    isOrder?: { items?: unknown[] } | null
+    orderCount?: number
     branch?: { name?: string; logo_url?: string; is_open?: boolean } | null
   }>()
 
@@ -66,13 +66,18 @@
         </button>
 
         <button
-          v-if="isOrder?.items?.length"
+          v-if="orderCount"
           type="button"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-card border border-charcoal/10 bg-white shadow-soft transition-transform active:scale-90"
+          class="relative inline-flex h-9 w-9 items-center justify-center rounded-card border border-charcoal/10 bg-white shadow-soft transition-transform active:scale-90"
           :aria-label="t('common.orderHistory')"
           @click="$emit('view-history')"
         >
           <History :size="18" class="text-olive-dark" />
+          <span
+            class="absolute -top-1.5 -right-1.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-pill bg-olive px-1 text-[10px] font-bold text-white"
+          >
+            {{ orderCount }}
+          </span>
         </button>
 
         <LanguageBottomSheet :stacked-btn="false" :icon-btn="true" />

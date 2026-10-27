@@ -18,6 +18,11 @@ export const useOrderStore = defineStore('order', {
       const { data } = await orderService.getOrderByTable(table)
       return data
     },
+    async fetchSessionHistory(tableId) {
+      const table = toValue(tableId)
+      const { data } = await orderService.getSessionHistory(table)
+      return data
+    },
     async fetchAllOrders() {
       const { data } = await orderService.getAllOrder()
       this.orders = data

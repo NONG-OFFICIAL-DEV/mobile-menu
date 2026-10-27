@@ -41,7 +41,7 @@
   const { addToCart, updateQty } = cartStore
   const notif = useNotif()
 
-  const order = ref<{ items?: unknown[] } | null>(null)
+  const orderCount = ref(0)
   const selectedCategory = ref<number | string>('All')
   const search = ref('')
 
@@ -90,8 +90,8 @@
   onMounted(async () => {
     await digitalMenuStore.fetchDigitalMenus(branchSlug.value, tableId.value)
     if (tableId.value) {
-      const response = await orderStore.fetchOrderByTable(tableId.value)
-      order.value = response.data
+      const response = await orderStore.fetchSessionHistory(tableId.value)
+      orderCount.value = (response.data ?? []).length
     }
   })
 </script>
@@ -100,7 +100,7 @@
   <div class="min-h-dvh bg-ivory pb-28">
     <AppHeader
       v-if="showHeaderContext"
-      :is-order="order || {}"
+      :order-count="orderCount"
       :table-number="tableNumber"
       :branch="branch"
       @view-process="goToTracking"

@@ -1,17 +1,24 @@
 <script setup lang="ts">
   import { computed } from 'vue'
   import { Plus, ImageOff } from 'lucide-vue-next'
-  import { formatCurrency } from '@nong-official-dev/core'
   import { useI18n } from 'vue-i18n'
   import QtyStepper from '../customs/QtyStepper.vue'
   import BaseBadge from '@/components/ui/BaseBadge.vue'
   import { useNotif } from '@/composables/useNotif'
+  import { useMoney } from '@/composables/useMoney'
+  import { useDigitalMenuStore } from '@/stores/digitalMenuStore'
 
   interface Variant {
     id: number | string
     name: string
-    price: number
-    base_price: number
+    price_adjustment: number
+    is_default?: boolean
+    sort_order?: number
+  }
+
+  interface ModifierGroup {
+    id: number | string
+    options?: unknown[]
   }
 
   interface Product {
@@ -19,18 +26,18 @@
     name: string
     description?: string
     image_url?: string
-    base_price?: number
+    base_price: number
     sort_order?: number
-    has_variants?: boolean
     is_available?: boolean
     variants?: Variant[]
+    modifier_groups?: ModifierGroup[]
     category?: { id: number | string }
   }
 
   interface CartLine {
     id: string | number
     qty: number
-    variant_id?: string | number
+    menu_id: string | number
   }
 
   const props = defineProps<{
@@ -46,6 +53,8 @@
 
   const { t } = useI18n()
   const notif = useNotif()
+  const { formatMoney } = useMoney()
+  const digitalMenuStore = useDigitalMenuStore()
 
   const MAX_QTY_PER_ITEM = 5
 
@@ -53,35 +62,41 @@
     [...(props.items || [])].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
   )
 
-  const getQty = (id: string | number) => props.cart.find(i => i.id === id)?.qty || 0
+  // There's no `has_variants` flag on the real API — a product needs the
+  // customize sheet if it actually has sizes and/or modifier groups to pick.
+  const needsCustomization = (product: Product) =>
+    (product.variants?.length ?? 0) > 0 || (product.modifier_groups?.length ?? 0) > 0
 
-  // Variant cart lines are matched by `variant_id`, not `id` — `id` now encodes
-  // the full configuration (variant + sugar + note) so distinct customizations
-  // of the same variant stay as separate lines instead of silently merging.
-  const getProductTotalQty = (product: Product) => {
-    if (!product.has_variants) return getQty(product.id)
-    const variantIds = new Set((product.variants || []).map(v => v.id))
-    return props.cart.reduce((sum, i) => (variantIds.has(i.variant_id as any) ? sum + i.qty : sum), 0)
-  }
+  // Every cart line — quick-added or built from the customize sheet — carries
+  // `menu_id` back to the source product, so this works regardless of
+  // whether the line's own `id` is the plain product id or a composite
+  // variant+modifiers+note key.
+  const getProductQtyInCart = (product: Product) =>
+    props.cart.reduce((sum, i) => (i.menu_id === product.id ? sum + i.qty : sum), 0)
 
-  const getLastVariantInCart = (product: Product) => {
-    const variantIds = new Set((product.variants || []).map(v => v.id))
-    return [...props.cart].reverse().find(i => variantIds.has(i.variant_id as any)) || null
-  }
+  const getLastLineInCart = (product: Product) =>
+    [...props.cart].reverse().find(i => i.menu_id === product.id) || null
 
   function handleIncrease(product: Product) {
     if (product.is_available === false) return
 
-    if (!product.has_variants) {
-      if (getQty(product.id) >= MAX_QTY_PER_ITEM) {
+    if (!needsCustomization(product)) {
+      if (getProductQtyInCart(product) >= MAX_QTY_PER_ITEM) {
         notif?.(t('notification.limitOrder'), { type: 'warning' })
         return
       }
-      emit('add', { ...product, menu_id: product.id, qty: 1 })
+      emit('add', {
+        id: product.id,
+        menu_id: product.id,
+        name: product.name,
+        image_url: product.image_url,
+        base_price: product.base_price,
+        qty: 1
+      })
       return
     }
 
-    if (getProductTotalQty(product) >= MAX_QTY_PER_ITEM) {
+    if (getProductQtyInCart(product) >= MAX_QTY_PER_ITEM) {
       notif?.(t('notification.limitOrder'), { type: 'warning' })
       return
     }
@@ -89,11 +104,11 @@
   }
 
   function handleDecrease(product: Product) {
-    if (!product.has_variants) {
+    if (!needsCustomization(product)) {
       emit('update', product.id, -1)
       return
     }
-    const last = getLastVariantInCart(product)
+    const last = getLastLineInCart(product)
     if (last) emit('update', last.id, -1)
   }
 
@@ -102,120 +117,70 @@
     else handleDecrease(product)
   }
 
-  const displayPrice = (product: Product) =>
-    product.has_variants ? product.variants?.[0]?.base_price : product.base_price
+  // "$X+" (starting-at price) when the product has more than one size,
+  // the exact price otherwise — variants only ever carry a
+  // price_adjustment, never their own absolute price.
+  const priceDisplay = (product: Product) => {
+    const price = formatMoney(product.base_price, digitalMenuStore.currency)
+    return (product.variants?.length ?? 0) > 1 ? `${price}+` : price
+  }
 </script>
 
-
-
 <template>
-  <div
-    class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
-  >
-    <article
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+    <div
       v-for="p in sortedItems"
       :key="p.id"
-      class="group flex min-w-0 flex-col overflow-hidden rounded-2xl
-             border border-charcoal/[0.07] bg-white
-             shadow-[0_2px_12px_rgba(41,39,32,0.035)]
-             transition-all duration-200
-             hover:-translate-y-0.5 hover:shadow-soft"
-      :class="{
-        'opacity-75': p.is_available === false,
-      }"
+      class="flex flex-col rounded-card border border-charcoal/[0.06] bg-white p-3 shadow-soft"
     >
-      <!-- Product image -->
-      <div class="relative m-2 mb-0 aspect-square overflow-hidden rounded-xl bg-ivory">
+      <div class="relative mb-3 aspect-square overflow-hidden rounded-card bg-ivory">
         <img
           v-if="p.image_url"
           :src="p.image_url"
           :alt="p.name"
-          class="h-full w-full object-cover transition-transform duration-300
-                 group-hover:scale-[1.03]"
-          :class="{ 'grayscale': p.is_available === false }"
+          class="h-full w-full object-cover"
+          :class="{ 'opacity-40 grayscale': p.is_available === false }"
           loading="lazy"
         />
-
-        <div
-          v-else
-          class="flex h-full w-full items-center justify-center text-charcoal/25"
-        >
+        <div v-else class="flex h-full w-full items-center justify-center text-charcoal/20">
           <ImageOff :size="28" aria-hidden="true" />
         </div>
 
-        <!-- Unavailable badge -->
-        <div
-          v-if="p.is_available === false"
-          class="absolute inset-0 flex items-center justify-center bg-white/20"
-        >
-          <BaseBadge tone="neutral">
-            {{ t('common.unavailable') }}
-          </BaseBadge>
-        </div>
-
-        <!-- Quantity indicator -->
-        <span
-          v-if="getProductTotalQty(p) > 0"
-          class="absolute right-2 top-2 flex h-7 min-w-7 items-center
-                 justify-center rounded-full bg-olive px-2
-                 text-xs font-semibold text-white shadow-sm"
-        >
-          {{ getProductTotalQty(p) }}
-        </span>
+        <BaseBadge v-if="p.is_available === false" tone="neutral" class="absolute left-2 top-2">
+          {{ t('common.unavailable') }}
+        </BaseBadge>
       </div>
 
-      <!-- Product information -->
-      <div class="flex flex-1 flex-col p-3 pt-3">
-        <h3
-          class="line-clamp-2 min-h-10 text-sm font-semibold leading-5
-                 tracking-[-0.01em] text-charcoal sm:text-base"
-        >
-          {{ p.name }}
-        </h3>
-
-        <p
-          v-if="p.description"
-          class="mt-1 line-clamp-2 text-xs leading-4 text-charcoal/55"
-        >
-          {{ p.description }}
-        </p>
-
-        <!-- Price and actions -->
-        <div class="mt-auto flex items-center justify-between gap-2 pt-4">
-          <span
-            class="min-w-0 break-words text-sm font-bold leading-tight
-                   tracking-[-0.02em] text-charcoal sm:text-base"
-          >
-            {{ formatCurrency(displayPrice(p)) }}
-          </span>
-
-          <button
-            v-if="getProductTotalQty(p) === 0"
-            type="button"
-            :disabled="p.is_available === false"
-            class="inline-flex h-9 w-9 shrink-0 items-center justify-center
-                   rounded-full bg-olive text-white
-                   transition-transform duration-150
-                   hover:bg-olive/90 active:scale-90
-                   focus-visible:outline-none focus-visible:ring-2
-                   focus-visible:ring-olive focus-visible:ring-offset-2
-                   disabled:cursor-not-allowed disabled:opacity-30"
-            :aria-label="`${t('btn.addToCart')}: ${p.name}`"
-            @click="handleIncrease(p)"
-          >
-            <Plus :size="18" aria-hidden="true" />
-          </button>
-
-          <QtyStepper
-            v-else
-            :model-value="getProductTotalQty(p)"
-            small
-            :min="0"
-            :max="MAX_QTY_PER_ITEM"
-            @change="delta => handleStepperChange(p, delta)"
-          />
-        </div>
+      <div class="mb-1 line-clamp-2 min-h-[2.5rem] text-sm font-semibold text-charcoal">
+        {{ p.name }}
       </div>
-    </article>
+      <p v-if="p.description" class="mb-2 line-clamp-1 text-xs text-charcoal/50">
+        {{ p.description }}
+      </p>
+
+      <div class="mt-auto flex items-center justify-between pt-1">
+        <span class="text-[15px] font-bold text-charcoal">{{ priceDisplay(p) }}</span>
+
+        <button
+          v-if="getProductQtyInCart(p) === 0"
+          type="button"
+          :disabled="p.is_available === false"
+          class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-olive text-white transition-transform active:scale-90 disabled:opacity-30"
+          :aria-label="t('btn.addToCart')"
+          @click="handleIncrease(p)"
+        >
+          <Plus :size="16" />
+        </button>
+
+        <QtyStepper
+          v-else
+          :model-value="getProductQtyInCart(p)"
+          small
+          :min="0"
+          :max="MAX_QTY_PER_ITEM"
+          @change="delta => handleStepperChange(p, delta)"
+        />
+      </div>
+    </div>
   </div>
 </template>

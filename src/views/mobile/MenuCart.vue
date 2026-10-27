@@ -22,10 +22,13 @@
         table_id: digitalMenuStore.tableId ?? null,
         items: cartStore.items.map(i => ({
           product_id: i.menu_id,
+          variant_id: i.variant_id ?? null,
           quantity: i.qty,
-          price: i.base_price,
-          note: i.note || null,
-          customizations: i.customizations || null
+          notes: i.note || null,
+          modifiers: (i.modifiers ?? []).map(m => ({
+            modifier_option_id: m.id,
+            quantity: 1
+          }))
         }))
       }
       await orderStore.placeOrder(orderData, 'noLoading')

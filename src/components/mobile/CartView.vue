@@ -3,19 +3,23 @@
   import { AnimatePresence, motion } from 'motion-v'
   import { useI18n } from 'vue-i18n'
   import { ShoppingBag, Trash2, StickyNote, ChevronRight, ImageOff } from 'lucide-vue-next'
-  import { formatCurrency } from '@nong-official-dev/core'
   import CustomAppHeader from './CustomAppHeader.vue'
   import QtyStepper from '../customs/QtyStepper.vue'
   import BaseButton from '@/components/ui/BaseButton.vue'
   import BaseIconButton from '@/components/ui/BaseIconButton.vue'
   import BaseBottomSheet from '@/components/ui/BaseBottomSheet.vue'
   import { useCartStore } from '@/stores/cartStore'
+  import { useDigitalMenuStore } from '@/stores/digitalMenuStore'
   import { useAppUtils } from '@/composables/useAppUtils'
+  import { useMoney } from '@/composables/useMoney'
   import type { CartItem } from '@/stores/cartStore'
 
   const { t, tm } = useI18n()
   const { confirm, notif } = useAppUtils()
   const cartStore = useCartStore()
+  const digitalMenuStore = useDigitalMenuStore()
+  const { formatMoney } = useMoney()
+  const currency = (value: number) => formatMoney(value, digitalMenuStore.currency)
 
   defineProps<{
     tableNumber?: number | string | null
@@ -111,10 +115,11 @@
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <div class="truncate text-[15px] font-bold text-charcoal">{{ item.name }}</div>
-                <div v-if="item.has_variants" class="text-xs text-charcoal/50">
-                  {{ (item.customizations as any)?.variant_name }}
-                  <span v-if="(item.customizations as any)?.sugar !== undefined">
-                    · {{ (item.customizations as any).sugar }}% sugar
+                <div v-if="item.size || item.modifiers?.length" class="text-xs text-charcoal/50">
+                  {{ item.size }}
+                  <span v-if="item.size && item.modifiers?.length"> · </span>
+                  <span v-if="item.modifiers?.length">
+                    {{ item.modifiers.map(m => m.name).join(', ') }}
                   </span>
                 </div>
                 <div v-if="item.note" class="mt-1 flex items-center gap-1 text-xs italic text-olive">
@@ -135,10 +140,10 @@
             <div class="mt-auto flex items-end justify-between pt-2">
               <div>
                 <div class="text-[15px] font-extrabold text-charcoal">
-                  {{ formatCurrency(item.base_price * item.qty) }}
+                  {{ currency(item.base_price * item.qty) }}
                 </div>
                 <div class="text-xs text-charcoal/40">
-                  {{ formatCurrency(item.base_price) }} / {{ t('common.items') }}
+                  {{ currency(item.base_price) }} / {{ t('common.items') }}
                 </div>
               </div>
               <QtyStepper
@@ -162,7 +167,7 @@
       <div class="mb-4 flex items-end justify-between">
         <div>
           <div class="text-xs text-charcoal/40">{{ t('common.total') }}</div>
-          <div class="text-xl font-extrabold text-olive">{{ formatCurrency(cartStore.cartTotal) }}</div>
+          <div class="text-xl font-extrabold text-olive">{{ currency(cartStore.cartTotal) }}</div>
         </div>
         <div class="text-right">
           <div class="text-xs text-charcoal/40">{{ cartStore.totalItems }} {{ t('common.items') }}</div>

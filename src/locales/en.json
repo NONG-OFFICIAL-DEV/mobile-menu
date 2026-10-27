@@ -38,6 +38,11 @@
     "subtotal": "Subtotal",
     "orderId": "Order ID",
     "orderqId": "Order ID",
+    "tax": "Tax",
+    "serviceCharge": "Service Charge",
+    "totalOrders": "Total Orders",
+    "totalItems": "Total Items",
+    "grandTotal": "Grand Total",
     "table": "Table",
     "addNote": "Add note",
     "editNote": "Edit note",
@@ -60,7 +65,14 @@
     "sugar": "Sugar",
     "maxPerItem": "Max {max} per item",
     "close": "Close",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "required": "Required",
+    "optional": "Optional",
+    "done": "Done",
+    "chooseGroup": "Choose {name}",
+    "pickOne": "Pick 1",
+    "pickUpTo": "Pick up to {n} · {count} selected",
+    "pickSeveral": "Pick several · {count} selected"
   },
   "lang": {
     "km": "Khmer",

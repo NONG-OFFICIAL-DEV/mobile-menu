@@ -1,10 +1,13 @@
 <script setup lang="ts">
   import { ChevronRight } from 'lucide-vue-next'
   import { motion } from 'motion-v'
-  import { formatCurrency } from '@nong-official-dev/core'
   import { useI18n } from 'vue-i18n'
+  import { useMoney } from '@/composables/useMoney'
+  import { useDigitalMenuStore } from '@/stores/digitalMenuStore'
 
   const { t } = useI18n()
+  const { formatMoney } = useMoney()
+  const digitalMenuStore = useDigitalMenuStore()
 
   defineProps<{
     totalItems: number
@@ -26,7 +29,9 @@
         {{ totalItems }}
       </span>
       <span class="font-semibold">{{ t('btn.yourOrder') }}</span>
-      <span class="ml-auto font-bold">{{ formatCurrency(totalPrice) }}</span>
+      <span class="ml-auto font-bold">
+        {{ formatMoney(totalPrice, digitalMenuStore.currency) }}
+      </span>
       <ChevronRight :size="18" />
     </motion.button>
   </div>

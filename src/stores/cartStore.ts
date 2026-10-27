@@ -1,17 +1,24 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 
+export interface CartItemModifier {
+  id: string | number
+  name: string
+  price: number
+}
+
 export interface CartItem {
   id: string | number
   menu_id: string | number
-  variant_id?: string | number
+  variant_id?: string | number | null
   name: string
   image_url?: string
+  // Resolved absolute unit price for this exact configuration
+  // (product.base_price + variant.price_adjustment + sum of modifier prices).
   base_price: number
   qty: number
   size?: string
-  has_variants?: boolean
-  customizations?: Record<string, unknown>
+  modifiers?: CartItemModifier[]
   note?: string
 }
 
