@@ -38,7 +38,9 @@
           type="search"
           :placeholder="t('common.search')"
           class="h-11 w-full rounded-pill border border-charcoal/10 bg-white pl-10 pr-10 text-[15px] text-charcoal placeholder:text-charcoal/40 outline-none transition-colors focus:border-olive"
-          @input="$emit('update:search', ($event.target as HTMLInputElement).value)"
+          @input="
+            $emit('update:search', ($event.target as HTMLInputElement).value)
+          "
         />
         <button
           v-if="search"
@@ -66,7 +68,11 @@
         <button
           type="button"
           class="relative shrink-0 rounded-pill px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors"
-          :class="modelValue === 'All' ? 'text-white' : 'text-charcoal/70 border border-charcoal/10 hover:border-olive/40'"
+          :class="
+            modelValue === 'All'
+              ? 'text-white'
+              : 'text-charcoal/70 border border-charcoal/10 hover:border-olive/40'
+          "
           @click="$emit('update:modelValue', 'All')"
         >
           <motion.div
@@ -82,8 +88,12 @@
           v-for="cat in categories"
           :key="cat.id"
           type="button"
-          class="relative shrink-0 rounded-pill px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors"
-          :class="modelValue === cat.id ? 'text-white' : 'text-charcoal/70 border border-charcoal/10 hover:border-olive/40'"
+          class="relative flex shrink-0 items-center gap-1.5 rounded-pill px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors"
+          :class="
+            modelValue === cat.id
+              ? 'text-white'
+              : 'text-charcoal/70 border border-charcoal/10 hover:border-olive/40'
+          "
           @click="$emit('update:modelValue', cat.id)"
         >
           <motion.div
@@ -91,6 +101,12 @@
             layout-id="category-pill"
             class="absolute inset-0 rounded-pill bg-olive"
             :transition="{ type: 'spring', stiffness: 450, damping: 32 }"
+          />
+          <i
+            v-if="cat.icon"
+            :class="['mdi', cat.icon]"
+            class="relative text-base"
+            aria-hidden="true"
           />
           <span class="relative">{{ cat.name }}</span>
         </button>
